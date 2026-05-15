@@ -1,25 +1,42 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { AISummary } from "@/lib/types";
 
-const PROMPT_TEMPLATE = `Du er en faglig kurator som vurderer artikler for en UX-designer og produktutvikler som er interessert i AI, design systems, gaming og teknologi.
+const PROMPT_TEMPLATE = `Du er en faglig kurator for en UX-designer / produktutvikler som er interessert i:
+- UX-metodikk, design systems, brukerinnsikt og trender
+- AI-verktøy for utvikling (særlig Claude Code) og nyheter fra Anthropic
+- Gaming-nyheter og spillkultur
+- Håndholdte spillkonsoller og gaming-PCer (MSI Claw 8AI, Steam Deck, ROG Ally og lignende)
 
 Artikkel:
 Tittel: {title}
-Innhold (kan være tomt, basér deg da på tittelen alene):
+URL: {url}
+Innhold (utdrag fra siden eller feed-beskrivelsen):
+"""
 {content}
+"""
 
-Returner KUN gyldig JSON med disse feltene, ingen ekstra tekst eller markdown:
+KRITISKE REGLER:
+1. Sammendraget MÅ baseres utelukkende på innholdet over. IKKE bruk forhåndskunnskap eller anta hva forkortelser betyr (eks: "DS4" kan være DualShock 4, DwarfStar 4, eller noe helt annet — IKKE GJETT).
+2. Hvis innholdet er tomt, irrelevant til tittelen, eller for kort til å oppsummere meningsfullt:
+   - Sett "summary" til "Innholdet kunne ikke verifiseres mot tittelen."
+   - Sett "learning_value" til 0
+   - Sett "key_takeaway" til "Mangler innhold for analyse."
+3. Skriv summary og key_takeaway på NORSK.
+4. Tags skal være engelske, små bokstaver, korte (1-2 ord per tag).
+
+Returner KUN gyldig JSON, ingen markdown eller ekstra tekst:
 {
-  "summary": "2-3 setninger på norsk som oppsummerer hovedinnholdet. Vær konkret, ikke generisk.",
-  "learning_value": <heltall 1-10, der 10 = stor faglig læringsverdi, 1 = ren underholdning/clickbait>,
-  "tags": ["maks 5 korte tags, små bokstaver, engelske, beskriver emnet"],
+  "summary": "2-3 setninger som faktisk beskriver innholdet",
+  "learning_value": <heltall 0-10, der 0 = ikke kunne verifiseres / irrelevant>,
+  "tags": ["maks 5 tags"],
   "difficulty": "beginner" eller "intermediate" eller "advanced",
-  "reading_time": <heltall, estimert minutter å lese>,
-  "key_takeaway": "1 setning på norsk med viktigste poeng for leseren"
+  "reading_time": <heltall, estimert minutter>,
+  "key_takeaway": "1 setning med viktigste poeng for leseren"
 }`;
 
 export async function summarizeArticle(input: {
   title: string;
+  url: string;
   content: string;
 }): Promise<AISummary> {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -27,16 +44,19 @@ export async function summarizeArticle(input: {
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
+    // gemini-2.5-flash-lite: 15 RPM, 1000 RPD free tier (vs flash: 5 RPM, 20 RPD).
+    // Litt lavere kvalitet, men nok for MVP-testing. Kan byttes tilbake til "gemini-2.5-flash" når kvoten reset.
+    model: "gemini-2.5-flash-lite",
     generationConfig: {
       responseMimeType: "application/json",
-      temperature: 0.3,
+      temperature: 0.2,
     },
   });
 
   const prompt = PROMPT_TEMPLATE
     .replace("{title}", input.title)
-    .replace("{content}", input.content || "(ikke tilgjengelig)");
+    .replace("{url}", input.url)
+    .replace("{content}", input.content);
 
   const result = await model.generateContent(prompt);
   const text = result.response.text();

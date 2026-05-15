@@ -1,12 +1,15 @@
-export interface FetchedArticle {
-  external_id: string;
-  url: string;
-  title: string;
-  author: string;
-  published_at: string;
-  source: "hackernews";
-  excerpt: string | null;
-}
+import type { FetchedArticle } from "@/lib/types";
+
+const DEFAULT_TOPICS = [
+  "UX design",
+  "design systems",
+  "Claude Code",
+  "Anthropic Claude",
+  "Steam Deck",
+  "MSI Claw",
+  "ROG Ally",
+  "handheld gaming",
+];
 
 interface HNHit {
   objectID: string;
@@ -16,53 +19,80 @@ interface HNHit {
   points: number | null;
   story_text: string | null;
   created_at: string;
-  num_comments: number | null;
 }
 
 interface HNResponse {
   hits: HNHit[];
 }
 
-export async function fetchHackerNewsTopStories(options: {
-  minPoints?: number;
-  hoursBack?: number;
-  hitsPerPage?: number;
-} = {}): Promise<FetchedArticle[]> {
-  const minPoints = options.minPoints ?? 100;
-  const hoursBack = options.hoursBack ?? 48;
-  const hitsPerPage = options.hitsPerPage ?? 20;
-
-  const sinceTimestamp = Math.floor((Date.now() - hoursBack * 3600 * 1000) / 1000);
-
-  const url = new URL("https://hn.algolia.com/api/v1/search_by_date");
+async function searchOneTopic(
+  topic: string,
+  options: { minPoints: number; sinceTimestamp: number; hitsPerTopic: number }
+): Promise<FetchedArticle[]> {
+  const url = new URL("https://hn.algolia.com/api/v1/search");
+  url.searchParams.set("query", topic);
   url.searchParams.set("tags", "story");
   url.searchParams.set(
     "numericFilters",
-    `points>${minPoints},created_at_i>${sinceTimestamp}`
+    `points>${options.minPoints},created_at_i>${options.sinceTimestamp}`
   );
-  url.searchParams.set("hitsPerPage", String(hitsPerPage));
+  url.searchParams.set("hitsPerPage", String(options.hitsPerTopic));
 
-  const res = await fetch(url.toString(), {
-    headers: { "User-Agent": "Linspo/0.1" },
-  });
+  try {
+    const res = await fetch(url.toString(), {
+      headers: { "User-Agent": "Linspo/0.1" },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return [];
+    const data = (await res.json()) as HNResponse;
 
-  if (!res.ok) {
-    throw new Error(`HN Algolia API feilet: ${res.status} ${res.statusText}`);
+    return data.hits
+      .filter(
+        (h): h is HNHit & { url: string; title: string } =>
+          Boolean(h.url) && Boolean(h.title)
+      )
+      .map((h) => ({
+        external_id: h.objectID,
+        url: h.url,
+        title: h.title,
+        author: h.author || null,
+        published_at: h.created_at,
+        source: "hackernews",
+        excerpt: h.story_text,
+      }));
+  } catch {
+    return [];
   }
+}
 
-  const data = (await res.json()) as HNResponse;
+export async function fetchHackerNewsByTopics(
+  options: {
+    topics?: string[];
+    minPoints?: number;
+    daysBack?: number;
+    hitsPerTopic?: number;
+  } = {}
+): Promise<FetchedArticle[]> {
+  const topics = options.topics ?? DEFAULT_TOPICS;
+  const minPoints = options.minPoints ?? 10;
+  const daysBack = options.daysBack ?? 30;
+  const hitsPerTopic = options.hitsPerTopic ?? 5;
 
-  return data.hits
-    .filter((hit): hit is HNHit & { url: string; title: string } =>
-      Boolean(hit.url) && Boolean(hit.title)
-    )
-    .map((hit) => ({
-      external_id: hit.objectID,
-      url: hit.url,
-      title: hit.title,
-      author: hit.author,
-      published_at: hit.created_at,
-      source: "hackernews" as const,
-      excerpt: hit.story_text,
-    }));
+  const sinceTimestamp = Math.floor((Date.now() - daysBack * 86400 * 1000) / 1000);
+
+  const perTopicResults = await Promise.all(
+    topics.map((t) => searchOneTopic(t, { minPoints, sinceTimestamp, hitsPerTopic }))
+  );
+
+  const seen = new Set<string>();
+  const out: FetchedArticle[] = [];
+  for (const arr of perTopicResults) {
+    for (const article of arr) {
+      if (!seen.has(article.url)) {
+        seen.add(article.url);
+        out.push(article);
+      }
+    }
+  }
+  return out;
 }

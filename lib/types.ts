@@ -26,3 +26,13 @@ export interface AISummary {
   reading_time: number;
   key_takeaway: string;
 }
+
+export interface FetchedArticle {
+  external_id: string;
+  url: string;
+  title: string;
+  author: string | null;
+  published_at: string | null;
+  source: string;
+  excerpt: string | null;
+}

@@ -4,7 +4,7 @@ Personlig faglig kurator og læringsassistent. PWA som henter kuratert innhold d
 
 ## Status (2026-05-15)
 
-🟢 **Lokal MVP fungerer end-to-end.** HackerNews → Gemini 2.5 Flash → Supabase → forside med kuratert kortliste. ~17 artikler i basen, ingen rate-limit-feil.
+🟢 **Lokal MVP fungerer end-to-end.** Multi-kilde pipeline → Gemini-summarizer (med innholds-ekstraktor for å unngå hallusinering) → Supabase → forside med kuratert kortliste sortert på relevans.
 
 **Gjenstår:** Deploy til Cloudflare Pages + GitHub Actions cron + UptimeRobot. Se Fase 6 i `bright-whistling-perlis`-planen og `ADR-001`.
 
@@ -14,15 +14,37 @@ Personlig faglig kurator og læringsassistent. PWA som henter kuratert innhold d
 app/api/cron/fetch-content/route.ts   POST-endepunkt, auth via CRON_SECRET
 app/page.tsx                          Daglig feed (SSR, ISR revalidate=300)
 components/ArticleCard.tsx            Kort med tittel, sammendrag, key takeaway, tags
-lib/ai/gemini.ts                      Gemini-wrapper med JSON-output
-lib/content/hackernews.ts             HN Algolia-fetcher
-lib/content/fetch-pipeline.ts         HN → AI → Supabase med rate-limit-throttling
+lib/ai/gemini.ts                      Gemini-wrapper. Streng anti-fabrikasjons-prompt.
+lib/content/sources.ts                Aggregator. Henter alle kilder parallelt, interleaver
+lib/content/hackernews.ts             HN Algolia, multi-topic-søk (UX, Claude, gaming, handhelds)
+lib/content/rss.ts                    Generisk RSS/Atom-parser (fast-xml-parser)
+lib/content/extract.ts                Henter URL, plukker ut og:description / meta description / <p>
+lib/content/fetch-pipeline.ts         Orchestrerer: kilder → extract → AI → DB med rate-limit-throttling
 lib/content/content-hash.ts           SHA-256 for dedupe
-lib/types.ts                          Article, AISummary
+lib/types.ts                          Article, AISummary, FetchedArticle
 utils/supabase/server.ts              Read-only klient (publishable key)
 utils/supabase/admin.ts               Skrive-klient (secret key, kun cron)
 supabase/migrations/0001_*.sql        articles-tabell + RLS-policy
 ```
+
+## Innholdskilder (per 2026-05-15)
+
+| Kilde | Hva | Hvordan |
+|---|---|---|
+| HackerNews | UX, design systems, Claude Code, Anthropic, Steam Deck, MSI Claw, ROG Ally, handheld gaming | Algolia API, 8 topic-søk parallelt |
+| Reddit `/r/UXDesign` | UX-diskusjoner | RSS top-of-week |
+| Reddit `/r/ClaudeAI` | Claude-fellesskap | RSS top-of-week |
+| Reddit `/r/SteamDeck` | Steam Deck | RSS top-of-week |
+| Reddit `/r/SBCGaming` | Håndholdte (inkl. MSI Claw, ROG Ally) | RSS top-of-week |
+| Reddit `/r/handheldpcgaming` | Gaming-PCer i håndholdt-formfaktor | RSS top-of-week |
+| The Verge Gaming | Gaming-nyheter | RSS |
+| Polygon | Gaming-nyheter | RSS |
+
+Legg til/fjern kilder i `lib/content/sources.ts → RSS_FEEDS`.
+
+## Gemini-modell
+
+Bruker `gemini-2.5-flash-lite` for utvikling (15 RPM, 1000 RPD free tier). Bytt tilbake til `gemini-2.5-flash` i `lib/ai/gemini.ts` for høyere kvalitet i produksjon — men husk å øke `GEMINI_THROTTLE_MS` til 13s siden flash bare har 5 RPM.
 
 ## Vedtatt stack
 
