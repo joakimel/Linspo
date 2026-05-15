@@ -3,16 +3,37 @@ import { fetchHackerNewsByTopics } from "./hackernews";
 import { fetchRssFeed, type RssFeedConfig } from "./rss";
 
 const RSS_FEEDS: RssFeedConfig[] = [
-  // Reddit — topical communities (top of last week)
-  { url: "https://www.reddit.com/r/UXDesign/top.rss?t=week", source: "reddit-uxdesign", maxItems: 8 },
-  { url: "https://www.reddit.com/r/ClaudeAI/top.rss?t=week", source: "reddit-claudeai", maxItems: 8 },
-  { url: "https://www.reddit.com/r/SteamDeck/top.rss?t=week", source: "reddit-steamdeck", maxItems: 5 },
-  { url: "https://www.reddit.com/r/SBCGaming/top.rss?t=week", source: "reddit-sbcgaming", maxItems: 5 },
-  { url: "https://www.reddit.com/r/handheldpcgaming/top.rss?t=week", source: "reddit-handheldpc", maxItems: 5 },
+  // UX-fagstoff
+  { url: "https://www.smashingmagazine.com/feed/", source: "smashing", maxItems: 8 },
+  { url: "https://uxdesign.cc/feed", source: "uxdesign", maxItems: 8 },
+  { url: "https://www.nngroup.com/feed/rss/", source: "nngroup", maxItems: 8 },
 
-  // Pro gaming/tech outlets
-  { url: "https://www.theverge.com/rss/gaming/index.xml", source: "verge-gaming", maxItems: 8 },
-  { url: "https://www.polygon.com/rss/index.xml", source: "polygon", maxItems: 8 },
+  // Håndholdte og gaming-PCer (Joakims spesifikke interesse)
+  { url: "https://retrohandhelds.gg/feed/", source: "retrohandhelds", maxItems: 10 },
+  { url: "https://liliputing.com/feed/", source: "liliputing", maxItems: 10 },
+  {
+    url: "https://www.tomshardware.com/feeds.xml",
+    source: "tomshardware",
+    maxItems: 30,
+    // Tom's Hardware har bare én samlet feed — filtrér til handheld-relevant
+    keywordFilter: [
+      "handheld",
+      "steam deck",
+      "rog ally",
+      "msi claw",
+      "legion go",
+      "ayaneo",
+      "retroid",
+      "ayn ",
+    ],
+  },
+
+  // Linux-/Steam Deck-gaming
+  { url: "https://www.gamingonlinux.com/article_rss.php", source: "gamingonlinux", maxItems: 10 },
+
+  // Bredt tech (inkluderer ofte AI-/Claude-/gaming-nyheter)
+  { url: "https://www.theverge.com/rss/tech/index.xml", source: "verge-tech", maxItems: 10 },
+  { url: "https://www.theverge.com/rss/gaming/index.xml", source: "verge-gaming", maxItems: 10 },
 ];
 
 export async function fetchAllSources(): Promise<FetchedArticle[]> {
@@ -23,7 +44,6 @@ export async function fetchAllSources(): Promise<FetchedArticle[]> {
     ),
   ]);
 
-  // Interleave kildene så hver cron-kjøring får miks (i stedet for all HN først)
   const interleaved = interleaveArrays([hnArticles, ...rssResults]);
 
   const seen = new Set<string>();

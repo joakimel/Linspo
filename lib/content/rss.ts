@@ -7,6 +7,10 @@ export interface RssFeedConfig {
   url: string;
   source: string;
   maxItems?: number;
+  // Hvis satt: bare ta vare på artikler hvor tittel eller excerpt inneholder
+  // minst ett av disse nøkkelordene (case-insensitive). Brukes for å filtrere
+  // brede feeder (f.eks. Tom's Hardware) ned til relevant innhold.
+  keywordFilter?: string[];
 }
 
 export async function fetchRssFeed(config: RssFeedConfig): Promise<FetchedArticle[]> {
@@ -33,27 +37,35 @@ export async function fetchRssFeed(config: RssFeedConfig): Promise<FetchedArticl
     });
     const parsed = parser.parse(xml);
 
+    let items: FetchedArticle[] = [];
+
     // RSS 2.0
     const rssChannelItems = parsed?.rss?.channel?.item;
     if (rssChannelItems) {
-      const items = Array.isArray(rssChannelItems) ? rssChannelItems : [rssChannelItems];
-      return items
-        .slice(0, maxItems)
+      const raw = Array.isArray(rssChannelItems) ? rssChannelItems : [rssChannelItems];
+      items = raw
         .map((item: unknown) => normalizeRssItem(item, config.source))
         .filter((a): a is FetchedArticle => a !== null);
+    } else {
+      // Atom
+      const atomEntries = parsed?.feed?.entry;
+      if (atomEntries) {
+        const raw = Array.isArray(atomEntries) ? atomEntries : [atomEntries];
+        items = raw
+          .map((item: unknown) => normalizeAtomEntry(item, config.source))
+          .filter((a): a is FetchedArticle => a !== null);
+      }
     }
 
-    // Atom
-    const atomEntries = parsed?.feed?.entry;
-    if (atomEntries) {
-      const items = Array.isArray(atomEntries) ? atomEntries : [atomEntries];
-      return items
-        .slice(0, maxItems)
-        .map((item: unknown) => normalizeAtomEntry(item, config.source))
-        .filter((a): a is FetchedArticle => a !== null);
+    if (config.keywordFilter && config.keywordFilter.length > 0) {
+      const filters = config.keywordFilter.map((k) => k.toLowerCase());
+      items = items.filter((item) => {
+        const haystack = `${item.title} ${item.excerpt ?? ""}`.toLowerCase();
+        return filters.some((kw) => haystack.includes(kw));
+      });
     }
 
-    return [];
+    return items.slice(0, maxItems);
   } catch {
     return [];
   }

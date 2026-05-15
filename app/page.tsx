@@ -11,7 +11,9 @@ export default async function HomePage() {
     .from("articles")
     .select("*")
     .eq("ai_processed", true)
+    .gte("learning_value", 4)
     .order("fetched_at", { ascending: false })
+    .order("learning_value", { ascending: false })
     .limit(20);
 
   return (
