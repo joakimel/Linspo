@@ -22,13 +22,15 @@ Hjelpe brukeren å holde seg oppdatert uten informasjonsoverload, og gjøre det 
 
 | Mappe | Innhold |
 |---|---|
-| `01-research/` | Brukerundersøkelse, konkurranseanalyse, markedsinnsikt |
-| `02-documentation/` | Produktspesifikasjoner, krav, beslutningsdokumenter (ADRs) |
-| `03-design/` | UX-prosess, wireframes, designprinsipper, brand |
+| `01-research/` | Brukerundersøkelse, konkurranseanalyse, markedsinnsikt, rapporten |
+| `02-documentation/` | Produktoutline, krav, beslutningsdokumenter (ADRs) |
+| `03-design/` | UX-anbefalinger, interaksjonsmønstre, visuelle trender |
 | `04-planning/` | Roadmap, backlog, milepæler |
-| `05-resources/` | Referanser, inspirasjon, lenker, tekniske ressurser |
-| `06-dev/` | Tekniske beslutninger, arkitektur, kodebase (fremtidig) |
+| `05-resources/` | Referanser, inspirasjon, lenker |
+| `06-dev/` | Teknisk dokumentasjon: arkitektur, infra, PWA, AI-integrasjon |
+
+Når Next.js-appen scaffoldes, vil koden ligge på **rotnivå** (`app/`, `components/`, `lib/`, `package.json` osv.) — ikke inne i `06-dev/`.
 
 ## Status
 
-🟡 Tidlig fase — tech stack ikke bestemt. Fokus nå: research og produktdefinisjon.
+🟡 Tidlig fase — research og konsept ferdig, tech stack vedtatt (se `06-dev/`). Neste steg: scaffolde Next.js + Supabase MVP.

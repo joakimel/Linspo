@@ -2,10 +2,10 @@
 
 Produktdefinisjon, krav og beslutningsdokumenter.
 
-## Undermapper
+## Innhold
 
-- `product-specs/` — Funksjonelle krav, feature-beskrivelser, user stories
-- `decisions/` — Architecture Decision Records (ADRs): hva vi valgte, hvorfor, og hvilke alternativer vi forkastet
+- `Linspo_Outline_og_Konseptplan.md` — Hovedoutline med fasebeskrivelser (MVP → vekst)
+- `decisions/` — Architecture Decision Records (ADRs) *(opprettes når første ADR skrives)*
 
 ## ADR-format
 
@@ -14,7 +14,7 @@ Hver beslutning lagres som en egen fil: `ADR-001-navn.md`
 ```
 # ADR-001: [Tittel]
 
-**Dato:** YYYY-MM-DD  
+**Dato:** YYYY-MM-DD
 **Status:** Foreslått / Godkjent / Forkastet
 
 ## Kontekst

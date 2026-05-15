@@ -1,31 +1,35 @@
 # Dev
 
-Tekniske beslutninger, arkitektur og kodebase.
+Tekniske beslutninger, arkitektur og infrastrukturnotater.
 
-## Status
+> **Merk:** Selve Next.js-appen vil ligge på rotnivå av repoet (`app/`, `components/`, `package.json` osv.) når den scaffoldes. Denne mappen er for *teknisk dokumentasjon*, ikke kode.
 
-Tech stack er ikke valgt ennå. Se `02-documentation/decisions/` for ADR-er når beslutninger tas.
+## Innhold
 
-## Kandidater
+- `architecture_proposal.md` — Komplett arkitektur, dataflyt og databaseskjema
+- `pwa_architecture.md` — PWA-spesifikt (Serwist, service worker, offline)
+- `hosting_and_infra.md` — Cloudflare Pages, GitHub Actions, Supabase-region
+- `ai_integration.md` — Gemini Flash, prompts, fallback-strategi
+- `gotchas_and_risks.md` — Kjente fallgruver og mitigeringer
 
-### Full-stack alternativer
+## Vedtatt stack (MVP)
 
-| Stack | Fordeler | Ulemper |
-|---|---|---|
-| Next.js + Supabase | Stort økosystem, god DX, Supabase gir auth + DB + realtime gratis | Mer konfigurering, React-overhead |
-| SvelteKit + Supabase | Enklere syntaks, raskere å lære, lettere bundle | Mindre community, færre biblioteker |
-| Remix + Supabase | God data-loading-filosofi, progressiv enhancement | Mindre brukt, mer nisje |
+| Lag | Valg |
+|---|---|
+| Frontend | Next.js 16 (App Router) + TypeScript |
+| Styling | Tailwind CSS v4 |
+| PWA | Serwist |
+| Database | Supabase (Postgres) — `eu-central-1` |
+| Auth | Supabase Auth |
+| AI | Gemini 2.5 Flash (primær), Groq (fallback) |
+| Cron | GitHub Actions |
+| Hosting | Cloudflare Pages |
+| E-post | Resend.com |
 
-### Innhenting og bakgrunnsjobber
+**Estimert månedlig kostnad i MVP-fasen: $0**
 
-- **Cron-basert** (f.eks. GitHub Actions, Railway cron) — enkelt å starte med
-- **Queue-basert** (f.eks. BullMQ) — bedre skalering, men mer kompleksitet
+Se `architecture_proposal.md` for detaljer og databaseskjema.
 
-### AI-integrasjon
+## ADR-er
 
-- OpenAI API / Anthropic API for sammendrag og kategorisering
-- Vurder kostnad per bruker tidlig
-
----
-
-*Oppdateres når tech stack er bestemt.*
+Når arkitekturbeslutninger formaliseres, lag ADR-er under `02-documentation/decisions/`.

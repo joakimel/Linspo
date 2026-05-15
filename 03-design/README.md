@@ -2,12 +2,13 @@
 
 UX-prosess, designprinsipper og visuelle beslutninger.
 
-## Undermapper
+## Innhold
 
-- `ux/` — Brukerflyt, wireframes, prototyper, informasjonsarkitektur
-- `brand/` — Visuelle prinsipper, farger, typografi, tone of voice
+- `ux_recommendations.md` — UX-anbefalinger basert på research
+- `interaction_patterns.md` — Interaksjonsmønstre og mikrointeraksjoner
+- `visual_trends.md` — Visuelle trender, layout, typografi
 
-## Designprinsipper (utkast)
+## Designprinsipper
 
 1. **Signal over støy** — Hvert element skal tjene et formål. Ingen dekorasjon uten funksjon.
 2. **Aktiv læring** — Innhold presenteres slik at det inviterer til handling, ikke bare lesing.
