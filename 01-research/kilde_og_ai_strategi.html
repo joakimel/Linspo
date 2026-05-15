@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linspo — kilde- og AI-strategi-research</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.7;
+    color: #1a1a2e;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 48px;
+    font-size: 15px;
+  }
+  h1 {
+    font-size: 2em;
+    color: #1a1a2e;
+    border-bottom: 3px solid #4f46e5;
+    padding-bottom: 12px;
+    margin-top: 0;
+  }
+  h2 {
+    font-size: 1.4em;
+    color: #2d2d5e;
+    border-bottom: 1px solid #e0e0f0;
+    padding-bottom: 6px;
+    margin-top: 2em;
+  }
+  h3 {
+    font-size: 1.15em;
+    color: #3730a3;
+    margin-top: 1.6em;
+  }
+  h4 {
+    font-size: 1em;
+    color: #1a1a2e;
+    margin-top: 1.2em;
+  }
+  blockquote {
+    background: #f0f0ff;
+    border-left: 4px solid #4f46e5;
+    margin: 1em 0;
+    padding: 12px 20px;
+    border-radius: 0 6px 6px 0;
+    color: #333;
+  }
+  code {
+    background: #f4f4f8;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+    font-size: 0.88em;
+    color: #3730a3;
+  }
+  pre {
+    background: #f4f4f8;
+    padding: 16px 20px;
+    border-radius: 6px;
+    overflow-x: auto;
+    border: 1px solid #e0e0f0;
+  }
+  pre code {
+    background: none;
+    padding: 0;
+    color: #1a1a2e;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+    font-size: 0.88em;
+  }
+  th {
+    background: #4f46e5;
+    color: white;
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e8e8f0;
+    vertical-align: top;
+  }
+  tr:nth-child(even) td {
+    background: #f9f9ff;
+  }
+  tr:hover td {
+    background: #f0f0ff;
+  }
+  ol, ul {
+    padding-left: 1.6em;
+  }
+  li {
+    margin-bottom: 4px;
+  }
+  hr {
+    border: none;
+    border-top: 1px solid #e0e0f0;
+    margin: 2.5em 0;
+  }
+  strong {
+    color: #1a1a2e;
+  }
+  em {
+    color: #333;
+  }
+  .meta {
+    color: #666;
+    font-size: 0.9em;
+    background: #f9f9ff;
+    padding: 10px 16px;
+    border-radius: 6px;
+    margin-bottom: 2em;
+    border: 1px solid #e0e0f0;
+  }
+  .tldr-box {
+    background: linear-gradient(135deg, #f0f0ff 0%, #e8e8ff 100%);
+    border: 1px solid #c7c7f0;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 1.5em 0;
+  }
+  @media print {
+    body { padding: 20px 30px; }
+    h1 { font-size: 1.7em; }
+    a { color: inherit; text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Linspo — kilde- og AI-strategi-research</h1>
+
+<div class="meta">
+  Utarbeidet: 15. mai 2026 &nbsp;|&nbsp; Forfatter: AI research-konsulent &nbsp;|&nbsp; Versjon: 1.0
+</div>
+
+<hr>
+
+<h2>TL;DR (12 punkter)</h2>
+
+<ol>
+<li><strong>RSS er fremdeles ryggraden</strong> — alle seriøse curation-apper bygger på RSS, supplert med API-er og scraping. Du er på riktig spor.</li>
+<li><strong>Medium er en god kilde med forbehold</strong> — RSS fungerer gratis (<code>medium.com/feed/@username</code> eller <code>publication.com/feed/</code>), men innhold bak betalingsmur er ikke tilgjengelig i feeden. Signal-til-støy er lavere enn f.eks. Smashing Magazine.</li>
+<li><strong>Substack er glimrende</strong> — alle newsletters har <code>newsletter.substack.com/feed</code>. For Linspos formål er The Pragmatic Engineer, TLDR Tech og TLDR Design de mest relevante. TLDR har også offisiell RSS på <code>tldrnewsletter.com/rss</code>.</li>
+<li><strong>Bluesky gir deg RSS per profil</strong> gratis via <code>openrss.org/bsky.app/profile/[handle]</code>. Hashtag/topic-feeds finnes ikke nativt, men <code>public.api.bsky.app</code> har søke-API uten autentisering.</li>
+<li><strong>Mastodon hashtag-RSS er enkelt</strong> — <code>mastodon.social/tags/uxdesign.rss</code> fungerer rett ut av boksen for ethvert offentlig Mastodon-instans.</li>
+<li><strong>Lobste.rs er undervurdert for Joakims formål</strong> — har <code>ai</code>, <code>design</code>, <code>a11y</code> og <code>games</code>-tagger, alle med dedikert RSS på <code>lobste.rs/t/[tag].rss</code>. Lavere volum enn HN, men høyere signal.</li>
+<li><strong>AI-sammendrag er ofte ikke det mest verdifulle</strong> — klassifisering + personlig scoring + ukentlig syntese gir mer verdi per token enn per-artikkel-sammendrag, særlig når RSS-feeds allerede inkluderer <code>&lt;description&gt;</code>.</li>
+<li><strong>20 RPD-budsjettet</strong> (Gemini 2.5 Flash, verifisert desember 2025-nedskjæring) bør brukes til batch-klassifisering (én kall per 10 artikler) og ukentlig syntese, ikke individuelle sammendrag.</li>
+<li><strong>For n=1 bruker er implisitte signaler sterkere</strong> — klikk + lesetid (&gt;30 sek terskel) + "save" er bedre indikatorer enn eksplisitt 👍/👎 som skaper fatigue.</li>
+<li><strong>Feedback må omsettes til konkret prompt-endring</strong> — ikke bare lagres som data. En enkel emne-vektingstabell som oppdateres ukentlig er mer effektiv enn kompleks ML.</li>
+<li><strong>Daglig digest slår real-time feed</strong> for Joakims bruksmønster — curated morning brief (7-10 elementer) gir høyere engasjement enn åpen feed, ifølge sammenlignbare apper.</li>
+<li><strong>Time Extension og GamingOnLinux er de to beste handheld-kildene</strong> — seriøs dekning, aktiv RSS, lav støy. RetroDodo er mer "vibes", Retro Game Corps er utmerkede guides men lavfrekvent.</li>
+</ol>
+
+<hr>
+
+<h2>Oppgave 1 — Kilde-strategi</h2>
+
+<h3>Hvordan sammenlignbare apper løser dette</h3>
+
+<p><strong>Feedly</strong> og <strong>Inoreader</strong> er de to dominerende "pro"-RSS-aggregatorene, og begge bygger modellen sin på en enkel sannhet: <em>de aller fleste gode kilder allerede har RSS</em>. Feedly tilbyr enterprise-rettet AI-analyse ("Leo") som filtrerer og prioriterer, men kildemodellen er ren RSS + brukerbidrag. Inoreader la til Bluesky-, YouTube- og Reddit-integrasjon i 2025/2026, og er mer "power user"-orientert med regelmotor for auto-tagging og routing.</p>
+
+<p><strong>Refind</strong> er det interessante avviket. De crawler 10 000+ kilder aktivt (publikasjoner, Substack, Medium, X/Twitter, LinkedIn) og bruker en kombinasjon av brukeradferd (hva folk lagrer og deler) og redaksjonelt kurasjon til å bygge en scoremodell. De favoriserer "timeless pieces" — innhold med lang holdbarhet. Kildemodellen er i praksis en crawl-basert tilnærming med bruker-signaler som reranker. Ingen offentlig API, men en verdifull inspirasjon: <em>kurasjon handler om scoring, ikke bare aggregering</em>.</p>
+
+<p><strong>Readwise Reader</strong> (Ghostreader) har en mer enkel kildemodell — RSS + e-post newsletters via sin innebygde e-postadresse. AI-en (Ghostreader) brukes <em>etter</em> innhenting, på individuelle dokumenter: oppsummering, ordoppslag, konseptforklaring, spørsmålsgenerering. Det er en "read-it-later"-app med AI-hjelp, ikke en AI-kurator.</p>
+
+<p><strong>Matter</strong> kombinerer RSS, "save from anywhere"-extension og sosiale anbefalinger (hva venner/folk du følger lagrer). AI-sammendrag genereres ved forespørsel, og er beskrevet som "best-designede" blant 2025-2026 lesapper. Kildemodellen er hybrid: RSS + brukerinnsending + sosial graf.</p>
+
+<p><strong>Inoreader 2026</strong> er mest relevant for Linspos fremtid: de la til Bluesky-, YouTube-, Reddit- og podcast-ingestion, og "Inoreader Intelligence" lar deg kjøre egendefinerte AI-prompts på artikkelinnhold. Dette er "Linspo med betalingsmur".</p>
+
+<p><strong>Nøkkelinsikt fra konkurrentanalysen:</strong> Alle suksessfulle curation-apper bruker RSS som fundament og supplerer med to-tre spesialtilpassede integrasjoner (e-post-til-RSS, sosiale API-er, spesifikke plattform-crawler). Ingen av dem lar noe som helst stoppe dem fra å bruke RSS der det finnes — og det finnes nesten overalt.</p>
+
+<h3>Vurdering: Medium, Substack, Bluesky, Mastodon, Lobste.rs m.fl.</h3>
+
+<p><strong>Medium</strong><br>
+RSS-URL-format: <code>medium.com/feed/@username</code> eller <code>medium.com/feed/publication-name</code>, og for custom domain-publikasjoner: <code>example.com/feed/</code>. Fungerer uten API-nøkkel. Begrensning: Artikler bak Medium-betalingsmur leverer kun tittel + excerpt i feeden, ikke fulltekst. Signal-til-støy er <em>middels</em> — Medium har mye "10 tips"-innhold og SEO-stoff, men også genuine dypdykk. Anbefaling for Linspo: <strong>legg til selektivt</strong> — kun spesifikke publikasjoner (f.eks. UX Collective: <code>uxdesign.cc/feed/</code>) fremfor <code>medium.com/tag/ux-design</code> (som er veldig støyfullt).</p>
+
+<p><strong>Substack</strong><br>
+Alle Substack-newsletters har RSS: <code>newsletter.substack.com/feed</code>. Innhold bak Substack paywall er ikke tilgjengelig i RSS-feed (kun tittel/intro for paid issues). Gratis-newsletters som Linspo-relevante: TLDR Tech (<code>tldrnewsletter.com/rss</code> — verifisert offisiell feed), TLDR Design og TLDR AI (<code>tldr.tech/ai/rss</code> — verifisert). Anbefaling: <strong>høy prioritet</strong> for TLDR-serien.</p>
+
+<p><strong>Bluesky / AT Protocol</strong><br>
+Bluesky lanserte native RSS-støtte: <code>bsky.app/profile/[handle]/rss</code> fungerer for enhver offentlig profil. OpenRSS forbedrer dette til <code>openrss.org/bsky.app/profile/[handle]</code> med bedre link-embedding og thumbnails. Hashtag/topic-feeds: <strong>finnes ikke</strong> som native RSS. Alternativ: bruk <code>public.api.bsky.app/xrpc/app.bsky.feed.searchPosts?q=%23uxdesign</code> (ingen autentisering nødvendig) for søkebasert henting. Anbefaling: <strong>lav til middels prioritet nå</strong> — overvåk spesifikke Bluesky-profiler via RSS-profil-feeds.</p>
+
+<p><strong>Mastodon</strong><br>
+Hashtag-RSS fungerer perfekt: <code>mastodon.social/tags/[hashtag].rss</code> — kun offentlige innlegg, ingen autentisering. Relevante hashtags: <code>#uxdesign</code>, <code>#claude</code>, <code>#anthropic</code>, <code>#steamdeck</code>. Anbefaling: <strong>middels prioritet</strong> — legg til <code>#uxdesign</code> og <code>#steamdeck</code> fra mastodon.social som prøve.</p>
+
+<p><strong>Lobste.rs</strong><br>
+Svært relevant for Joakims tekniske interesser. Verifiserte tagger med RSS:</p>
+<ul>
+<li><code>lobste.rs/t/ai.rss</code> — AI/ML-diskusjoner</li>
+<li><code>lobste.rs/t/design.rss</code> — visuell design</li>
+<li><code>lobste.rs/t/a11y.rss</code> — tilgjengelighet</li>
+<li><code>lobste.rs/t/games.rss</code> — spill</li>
+<li>Kombinert: <code>lobste.rs/t/ai,design.rss</code></li>
+</ul>
+<p>Volum er lavt (5-20 poster/dag total), men signal-til-støy er <em>svært høyt</em> — invite-only community av utviklere og tech-folk. Anbefaling: <strong>høy prioritet</strong>, særlig <code>ai</code> og <code>design</code>.</p>
+
+<p><strong>TLDR-nyhetsbrevene</strong><br>
+Offisiell RSS: <code>tldrnewsletter.com/rss</code> (verifisert). TLDR publiserer nå 14+ spesialiserte newsletters, inkludert TLDR Design og TLDR AI. Daglig oppdatert, meget høy signal-til-støy for tech-nyheter. Anbefaling: <strong>høy prioritet</strong>.</p>
+
+<p><strong>ArXiv</strong><br>
+Offisiell RSS per kategori: <code>rss.arxiv.org/rss/cs.HC</code> (Human-Computer Interaction), <code>rss.arxiv.org/rss/cs.AI</code>. Kombinert: <code>rss.arxiv.org/rss/cs.HC+cs.AI</code>. Anbefaling: <strong>kun cs.HC</strong> hvis Joakim vil holde seg oppdatert på UX-forskning; ellers hopp over.</p>
+
+<p><strong>YouTube-kanaler (ETA Prime, Retro Game Corps)</strong><br>
+YouTube-kanaler har RSS: <code>www.youtube.com/feeds/videos.xml?channel_id=[CHANNEL_ID]</code>. Innholdet er tittel + beskrivelse, ingen transkripsjon. Anbefaling: <strong>middels prioritet</strong> — legg til YouTube-RSS for ETA Prime og Retro Game Corps, men ikke transkripsjoner i første omgang.</p>
+
+<h3>Anbefalte nye kilder for Linspo (prioritert tabell)</h3>
+
+<table>
+<tr><th>Prioritet</th><th>Kilde</th><th>RSS-URL</th><th>Signal/Støy</th><th>Dekning</th><th>Merknader</th></tr>
+<tr><td><strong>1 — Høy</strong></td><td>Lobste.rs (ai+design)</td><td><code>https://lobste.rs/t/ai,design.rss</code></td><td>Svært høy</td><td>UX, AI, tech</td><td>Lavt volum (~5/dag), invite-only</td></tr>
+<tr><td><strong>1 — Høy</strong></td><td>TLDR Tech</td><td><code>https://tldrnewsletter.com/rss</code></td><td>Høy</td><td>Generell tech</td><td>Daglig digest, verifisert offisiell</td></tr>
+<tr><td><strong>1 — Høy</strong></td><td>TLDR AI</td><td><code>https://tldr.tech/ai/rss</code></td><td>Høy</td><td>AI/ML/Claude</td><td>Verifisert, svært relevant</td></tr>
+<tr><td><strong>1 — Høy</strong></td><td>TLDR Design</td><td><code>https://tldr.tech/design/rss</code></td><td>Høy</td><td>UX/UI</td><td>Verifisert</td></tr>
+<tr><td><strong>2 — Middels</strong></td><td>Time Extension</td><td><code>https://www.timeextension.com/feeds/news</code></td><td>Høy</td><td>Retro/handheld gaming</td><td>Verifisert RSS (20 artikler/dag)</td></tr>
+<tr><td><strong>2 — Middels</strong></td><td>Pocket Tactics</td><td><code>https://www.pockettactics.com/mainrss.xml</code></td><td>Middels</td><td>Handheld/mobil gaming</td><td>Dekker Switch, Steam Deck</td></tr>
+<tr><td><strong>2 — Middels</strong></td><td>Anthropic News</td><td><code>https://openrss.org/feed/www.anthropic.com/news</code></td><td>Svært høy</td><td>Claude/Anthropic</td><td>Via OpenRSS, fungerer stabilt</td></tr>
+<tr><td><strong>2 — Middels</strong></td><td>UX Collective (Medium)</td><td><code>https://uxdesign.cc/feed/</code></td><td>Middels-høy</td><td>UX/UI metodikk</td><td>Custom domain, unngår støy</td></tr>
+<tr><td><strong>2 — Middels</strong></td><td>Mastodon #uxdesign</td><td><code>https://mastodon.social/tags/uxdesign.rss</code></td><td>Middels</td><td>UX-diskusjoner</td><td>Kun mastodon.social-instans</td></tr>
+<tr><td><strong>3 — Lav</strong></td><td>Retro Game Corps</td><td><code>https://www.retrogamecorps.com/feed/</code></td><td>Høy</td><td>Handheld guides</td><td>Lav frekvens (1-3/uke)</td></tr>
+<tr><td><strong>3 — Lav</strong></td><td>arXiv cs.HC</td><td><code>https://rss.arxiv.org/rss/cs.HC</code></td><td>Middels (akademisk)</td><td>UX-forskning</td><td>Daglig, høyt volum</td></tr>
+<tr><td><strong>3 — Lav</strong></td><td>Bluesky-profiler</td><td><code>https://openrss.org/bsky.app/profile/[handle]</code></td><td>Avhenger</td><td>Varierer</td><td>Per-profil, manuelt vedlikehold</td></tr>
+<tr><td><strong>3 — Lav</strong></td><td>Mastodon #steamdeck</td><td><code>https://mastodon.social/tags/steamdeck.rss</code></td><td>Lav-middels</td><td>Steam Deck</td><td>Mye uformelt innhold</td></tr>
+<tr><td><strong>3 — Lav</strong></td><td>The Pragmatic Engineer</td><td><code>https://newsletter.pragmaticengineer.com/feed</code></td><td>Høy</td><td>Engineering</td><td>Betalingsmur på mest innhold</td></tr>
+<tr><td><strong>Avvent</strong></td><td>RetroDodo</td><td><code>https://retrododo.com/feed/</code></td><td>Middels</td><td>Retro gaming</td><td>Eksistens bekreftet, URL uklar</td></tr>
+</table>
+
+<h3>Tekniske implikasjoner</h3>
+
+<p><strong>Kill the Newsletter</strong> (<code>kill-the-newsletter.com</code>): Konverterer e-post-newsletters til Atom-feeds. Nyttig for newsletters uten RSS (f.eks. Bytes.dev). NB: Store plattformer som Substack og Medium blokkerer <code>@kill-the-newsletter.com</code>-adresser, men nyere nyhetsbrev som hostes på egne domener fungerer fint.</p>
+
+<p><strong>OpenRSS</strong> (<code>openrss.org</code>): Genererer RSS fra nettsteder som mangler det — inkludert <code>openrss.org/www.anthropic.com/news</code> for Anthropic-nyheter (verifisert). Gratis, ingen API-nøkkel.</p>
+
+<p><strong>Betalingsmur-håndtering</strong>: RSS-feeds for betalingsmur-innhold (Medium, Pragmatic Engineer, Substack paid) leverer kun tittel + excerpt. Dette er faktisk <em>tilstrekkelig</em> for klassifisering og scoring i Linspo — du trenger ikke fulltekst for å avgjøre om artikkelen er relevant.</p>
+
+<p><strong>YouTube RSS</strong>: <code>https://www.youtube.com/feeds/videos.xml?channel_id=UCecYBRFWDabJM2vQQz_7c2g</code> (ETA Prime) og <code>https://www.youtube.com/feeds/videos.xml?channel_id=UCjA4Msp3I_hzj2PPzfDO_0w</code> (Retro Game Corps). Inneholder kun tittel, beskrivelse og thumbnail — ingen transkripsjon uten ekstra behandling.</p>
+
+<hr>
+
+<h2>Oppgave 2 — AI-bruk</h2>
+
+<h3>Hvor er AI faktisk verdifullt?</h3>
+
+<p><strong>Spørsmål 1: Når er AI-sammendrag bedre enn forfatterens eget?</strong></p>
+
+<p>AI-genererte sammendrag er bedre enn forfattersummary i tre scenarioer:</p>
+<ol>
+<li>Feeden mangler <code>&lt;description&gt;</code> (bare tittel)</li>
+<li><code>&lt;description&gt;</code> er truncated eller ren HTML/boilerplate</li>
+<li>Du vil ha et sammendrag <em>på tvers av relaterte artikler</em> (syntese)</li>
+</ol>
+
+<p>For de fleste moderne RSS-feeds som Linspo allerede bruker (Smashing Magazine, NN/g, UX Collective), er <code>&lt;description&gt;</code> gjerne god nok for å ta en "lese/ikke lese"-beslutning. Forfatterens egne oppsummeringer er dessuten faktisk mer presise.</p>
+
+<p><strong>Konklusjon</strong>: Bruk forfatterens <code>&lt;description&gt;</code> som standard. Bruk AI kun der den mangler, er veldig kort (&lt;50 tegn), eller for synteseproduktet.</p>
+
+<p><strong>Spørsmål 2: Alternative AI-bruksområder</strong></p>
+
+<p>Rangert etter verdi-per-token for Linspo:</p>
+<ol>
+<li><strong>Batch-klassifisering</strong> (høyest verdi): Gi AI 10 artikler + titler og be den klassifisere etter interessekategori (UX, Claude, handheld, generell tech) og tildele relevans-score 1-10. Ett kall, 10 artikler, lavt token-forbruk.</li>
+<li><strong>Ukentlig syntese</strong> (høy verdi): "Her er de 20 mest leste/lagrede artiklene fra denne uken. Hva er de tre viktigste trendene på tvers?" Dette er noe AI er genuint bedre til enn noe annet.</li>
+<li><strong>Query expansion for kilde-oppdagelse</strong> (middels verdi): "Joakim er interessert i handheld gaming. Foreslå 5 nye RSS-feeds han bør legge til." En slik kall én gang i måneden.</li>
+<li><strong>Refleksjonsspørsmål</strong> (middels verdi): For artikler Joakim faktisk leser, generer ett spørsmål som hjelper ham å koble til egne prosjekter.</li>
+<li><strong>Per-artikkel-sammendrag</strong> (lavest verdi for dette prosjektet): Krevende, dyrt, og lite differensiert fra det forfatteren allerede har skrevet.</li>
+</ol>
+
+<h3>Hva konkurrenter gjør</h3>
+
+<table>
+<tr><th>App</th><th>AI-bruk</th><th>Strategi</th></tr>
+<tr><td><strong>Feedly (Leo)</strong></td><td>Prioritering + filtering + tagging</td><td>AI jobber <em>før</em> lesing — sorterer og skjuler irrelevant innhold</td></tr>
+<tr><td><strong>Readwise Ghostreader</strong></td><td>Oppsummering, ordoppslag, spørsmål, notattitler</td><td>AI jobber <em>under</em> lesing — hjelper med forståelse og notater</td></tr>
+<tr><td><strong>Matter</strong></td><td>AI-genererte sammendrag (swipe-down)</td><td>AI jobber <em>ved behov</em> — ikke automatisk</td></tr>
+<tr><td><strong>Refind</strong></td><td>Personlig score basert på brukeradferd + editorial</td><td>AI jobber <em>under kurasjon</em> — scoring og prioritering</td></tr>
+<tr><td><strong>Inoreader Intelligence</strong> (2026)</td><td>Egendefinerte prompts på artikkeltekst</td><td>AI jobber <em>etter lesing</em> — analyse og ekstrahering</td></tr>
+</table>
+
+<p><strong>Mønster</strong>: De beste appene bruker AI til <em>prioritering og syntese</em>, ikke bare <em>oppsummering</em>. Feedly er den mest relevante for Linspo: Leo-systemet klassifiserer innhold og gir relevans-score. Dette er veien fremover.</p>
+
+<h3>Anbefalt strategi for Linspo (gitt 20 RPD-budsjett)</h3>
+
+<blockquote>
+<strong>Anta 20 RPD med Gemini 2.5 Flash</strong> (bekreftet nedskjæring desember 2025). Merk: Gemini 2.5 Flash-Lite har 1000 RPD — vurder å bruke Flash-Lite for klassifisering og Flash for syntese. (CLAUDE.md bekrefter at prosjektet allerede bruker Flash-Lite i utvikling.)
+</blockquote>
+
+<p><strong>Daglig bruk (18 av 20 kall med Flash):</strong></p>
+<ul>
+<li>Systemet henter ~50-100 nye artikler per dag</li>
+<li>Batch dem i grupper på 5-8 artikler: <code>[tittel, source, description]</code> × 8 per kall</li>
+<li>Be Gemini om: (a) kategori-klassifisering, (b) relevans-score 1-10, (c) flagge om artikkelen er tidsempfølsom vs. evergreen</li>
+<li><strong>Resultat: ~7-12 batch-kall per dag</strong> = holder seg godt under 18</li>
+</ul>
+
+<p><strong>Ukentlig bruk (2 "lagrede" kall):</strong></p>
+<ul>
+<li>Spar 2 kall per dag (14 totalt i uken) til én ukentlig syntese på søndag</li>
+<li>Input: alle artikler Joakim klikket, lagret eller leste &gt;30 sek siste uke</li>
+<li>Output: "Ukens highlights", 3-5 trends, og 2-3 nye kildeforslag</li>
+</ul>
+
+<p><strong>Alternativ med Flash-Lite:</strong><br>
+Gemini 2.5 Flash-Lite har 1000 RPD gratis. Bruk Flash-Lite til all klassifisering/scoring, og reserver Flash til ukentlig syntese og refleksjonsspørsmål. Dette fjerner budsjettbegrensningen for klassifisering fullstendig.</p>
+
+<hr>
+
+<h2>Oppgave 3 — Brukerfeedback</h2>
+
+<h3>Implicit vs eksplisitt signaler</h3>
+
+<p><strong>Implisitte signaler (automatisk innsamlet):</strong></p>
+
+<table>
+<tr><th>Signal</th><th>Vekt</th><th>Tolkning</th><th>Teknisk implementasjon</th></tr>
+<tr><td>Klikk på artikkel</td><td>Middels</td><td>Positiv, men kan skyldes nysgjerrighet</td><td>Logg timestamp + source</td></tr>
+<tr><td>Lesetid &gt;30 sek</td><td>Høy</td><td>Sterk positiv — bruker faktisk leser</td><td>JavaScript-timer, pauses ved inaktivitet</td></tr>
+<tr><td>"Save"/bokmerke</td><td>Svært høy</td><td>Eksplisitt ønske om å huske</td><td>Eksisterende funksjon i MVP</td></tr>
+<tr><td>Scroll-dybde &gt;80%</td><td>Høy</td><td>Fulgte med gjennom artikkelen</td><td>Intersection Observer API</td></tr>
+<tr><td>Tilbake til feed &lt;5 sek</td><td>Negativ</td><td>Artikkelen svarte ikke til forventningene</td><td>Logg bounce-back</td></tr>
+<tr><td>Deling</td><td>Svært høy</td><td>Sterkeste positive signal</td><td>Del-funksjon + logg</td></tr>
+</table>
+
+<p><strong>Eksplisitte signaler:</strong></p>
+<ul>
+<li>👍/👎 på enkelt-artikler: fungerer, men fatigue-risiko ved daglig bruk</li>
+<li>"Mer som dette" / "Skjul kilde": kraftig og tydelig signal</li>
+<li>Ukentlig mini-rating: "Hva synes du om denne ukens feed?" (1-5) — lavere fatigue enn per-artikkel</li>
+</ul>
+
+<h3>Anbefalt feedback-modell for n=1 MVP</h3>
+
+<p><strong>Fase 1 (nå — 0 til 30 dager):</strong><br>
+Kun implisitte signaler. Logg klikk, lesetid og saves i Supabase. Ingen eksplisitt feedback til Joakim ennå. Bygg datagrunnlag.</p>
+
+<p><strong>Fase 2 (30-90 dager):</strong><br>
+Legg til to enkle eksplisitte signaler:</p>
+<ol>
+<li>Tommel opp/ned på <em>source</em>, ikke artikkel (gir mer stabil signal)</li>
+<li>"Skjul dette emnet i 2 uker"-knapp (gi brukeren kontroll uten permanent blokkering)</li>
+</ol>
+
+<p><strong>Fase 3 (90+ dager):</strong><br>
+Ukentlig syntese-notifikasjon med mulighet for mini-feedback: "Var denne ukens feed bra?" + fri tekstboks for notater til seg selv.</p>
+
+<p><strong>Feedbackfatigue-strategi:</strong></p>
+<ul>
+<li>Aldri vis feedback-UI i selve feed-scrolling</li>
+<li>Gjør det valgfritt og lett å avvise</li>
+<li>Visualiser at "AI lærer": vis en enkel tag-sky over "Dine toppinteresser denne måneden" som oppdateres synlig</li>
+</ul>
+
+<h3>Tidsdimensjonen</h3>
+
+<p>Joakims interesser varierer over tid. Modell dette ved å bruke <em>eksponentielt glidende gjennomsnitt</em> på kilde-vekting: nyere signaler teller mer enn gamle. Enkel implementasjon: <code>score = 0.7 × siste_uke_score + 0.3 × forrige_score</code>. Etter 3 uker uten klikk på en kilde synker scoren automatisk.</p>
+
+<h3>Hvordan feedback omsettes til pipeline-endring</h3>
+
+<pre><code>Feedback → Supabase-tabell → Ukentlig jobb →
+  1. Oppdater kilde-vekting (høy-score kilder dukker øverst)
+  2. Oppdater AI-klassifiserings-prompt (legg til/fjern emner)
+  3. Juster antall artikler per kilde i daglig batch
+  4. Blokkér emner/tags som har konsekvent dårlig score</code></pre>
+
+<p>Konkret teknisk løsning: En <code>source_weights</code>-tabell i Supabase med felt <code>source_id</code>, <code>weight</code> (0.0-2.0), <code>last_updated</code>. Vekten multipliseres med relevans-scoren fra AI. En ukentlig GitHub Actions-jobb re-kalkulerer vektene basert på loggede signaler.</p>
+
+<p><strong>Spotify Discover Weekly som inspirasjon:</strong> Spotifys hemmelige våpen var ikke algoritmen, men <em>timing</em> — mandag morgen, én gang i uken, forventningsbygging. Linspo kan lære av dette: ukentlig syntese levert på søndag kveld ("Her er hva du ikke bør gå glipp av denne uken") bygger en vane og forventning som øker engasjement.</p>
+
+<hr>
+
+<h2>Oppgave 4 — Annen relevant research</h2>
+
+<h3>Filter bubble og serendipitet i n=1-app</h3>
+
+<p>Filter bubble-problematikken er paradoksal for en personlig curation-app: <em>hele poenget</em> er å filtrere ned til det relevante, men overdreven filtrering kan gi blinde flekker. For Joakim, som bruker Linspo for <em>sin egen informasjonsdiett</em>, er dette faktisk et bevisst valg han gjør — ikke noe som gjøres <em>mot</em> ham.</p>
+
+<p>Likevel: <strong>bygg inn serendipitet-mekanismer</strong> fra starten. Konkrete tiltak:</p>
+<ol>
+<li>Én "wildcard"-artikkel per dag fra en tilfeldig kilde utenom Joakims toppscore-kategorier</li>
+<li>Månedlig "hva du kanskje har gått glipp av" — artikler med høy ekstern engasjement fra kilder han ikke følger</li>
+<li>La AI-syntesen eksplisitt flagge: "Dette kan overraske deg" — én artikkel som bryter mønsteret</li>
+</ol>
+
+<p>Forskning (2025, ArXiv) viser at "AI-initiated exploration" gir høyere serendipity-ratings og lavere friksjon enn bruker-initiert utforskning. La altså AI foreslå det uventede, ikke la Joakim måtte lete selv.</p>
+
+<h3>Etikk og personvern i en n=1-app</h3>
+
+<p>Fordi Linspo kun har én bruker (Joakim selv), er personvern-implikasjonene minimale sammenlignet med konsumer-apper. Likevel:</p>
+
+<p><strong>Data som lagres</strong>: Les-historikk, klikk-mønstre, tid brukt på artikler. Alt dette er Joakims egne data om seg selv — svært lav etisk risiko.</p>
+
+<p><strong>Transparens</strong>: Best practice er å gjøre alle lagrede preferanser synlige og redigerbare. Vis Joakim direkte hva systemet "tror" han liker (tag-vekter, kilde-scores) — dette er god UX og god etikk.</p>
+
+<p><strong>Fremtidig skalering</strong>: Hvis Linspo noen gang skulle åpnes for flere brukere, krever det GDPR-compliance: eksplisitt samtykke til adferdssporing, mulighet for data-export og sletting. Bygg inn datahygiene fra starten.</p>
+
+<h3>Daglig digest vs. feed-modell</h3>
+
+<p>Forskning og praksis peker konsistent i én retning: <strong>curated digest slår åpen feed for informasjonskvalitet</strong>, men <strong>feed vinner på impuls-lesing og hyppig retur</strong>.</p>
+
+<p>For en n=1-app som Linspo — der målet er informasjonskvalitet fremfor engasjement-maxing — er daglig digest riktig valg. Spesifikke anbefalinger:</p>
+<ul>
+<li><strong>7-10 elementer per dag</strong> (ikke 50) — bruker Joakims kognitive kapasitet bedre</li>
+<li><strong>Todelt struktur</strong>: 3-4 "viktigst å lese" (AI-klassifisert høy relevans + fersk) + 3-4 "verdt å vite" (lengre holdbarhet, evergreen)</li>
+<li><strong>Leveringstidspunkt</strong>: Morgen (07:00-08:00) — passer til kaffe-ritual, høyere åpnerate</li>
+<li><strong>Unngå doom-scroll</strong>: Sett en hard grense på antall elementer. Brukeren vet at når de har lest de 10 elementene, er de ferdig for dagen.</li>
+</ul>
+
+<p><strong>Doom-scroll-prevensjon</strong>: Matter og Readwise bruker "reading goals" (antall minutter, ikke antall artikler) for å gi lesing en naturlig avslutning. Linspo kan gjøre noe lignende: "Du har lest 3 av 8 elementer i dag" med en visuell progresjonslinje.</p>
+
+<h3>GitHub Actions som kjøremiljø</h3>
+
+<ul>
+<li><strong>Gratis tier</strong>: 2000 minutter/mnd for private repos, 50 000 for public</li>
+<li><strong>Scheduling</strong>: <code>cron: '0 5 * * *'</code> (05:00 UTC = 07:00 CET) for daglig kjøring</li>
+<li><strong>Secrets management</strong>: Supabase URL/nøkler, Gemini API-nøkkel kan lagres som GitHub Secrets gratis</li>
+<li><strong>Rate limiting</strong>: Med Gemini Flash (250 RPD etter normalisering) og Flash-Lite (1000 RPD) er GitHub Actions cron den rette triggeren — ikke event-drevet, men tidsbasert batch</li>
+</ul>
+
+<hr>
+
+<h2>Konkrete neste steg for Linspo (prioritert)</h2>
+
+<h3>Umiddelbart (denne uken)</h3>
+
+<ol>
+<li><strong>Legg til Lobste.rs ai+design RSS</strong> (<code>lobste.rs/t/ai,design.rss</code>) — 5 minutters arbeid, høyest signal/arbeid-ratio av alle anbefalingene</li>
+<li><strong>Legg til TLDR Tech, TLDR AI, TLDR Design</strong> — tre svært relevante feeds, alle verifisert fungerende</li>
+<li><strong>Legg til Anthropic News</strong> via OpenRSS (<code>openrss.org/feed/www.anthropic.com/news</code>)</li>
+<li><strong>Legg til Time Extension</strong> (<code>timeextension.com/feeds/news</code>) for handheld gaming</li>
+</ol>
+
+<h3>Kort sikt (2-4 uker)</h3>
+
+<ol start="5">
+<li><strong>Bytt AI-strategi fra per-artikkel-summary til batch-klassifisering</strong> — endre pipeline til å sende 8 artikler per Gemini-kall med instruksjon om kategori + relevans-score</li>
+<li><strong>Utforsk Gemini 2.5 Flash-Lite</strong> (1000 RPD gratis) — test om klassifiseringskvaliteten er akseptabel</li>
+<li><strong>Implementer enkel logging av klikk og lesetid</strong> i Supabase — bygg datagrunnlag for fremtidig personalisering</li>
+</ol>
+
+<h3>Middels sikt (4-8 uker)</h3>
+
+<ol start="8">
+<li><strong>Ukentlig syntese</strong> — én Gemini-kall per søndag som analyserer ukens høyest-engasjerte artikler</li>
+<li><strong>Kilde-vektingstabell i Supabase</strong> — automatisk re-kalkulert ukentlig basert på klikk/save-historikk</li>
+<li><strong>Digest-modus</strong> — vis 7-10 elementer per dag fremfor full feed, med morgenleveringstidspunkt</li>
+</ol>
+
+<h3>Lengre sikt (3+ måneder)</h3>
+
+<ol start="11">
+<li><strong>Mastodon-integrasjon</strong> — legg til <code>mastodon.social/tags/uxdesign.rss</code> og <code>mastodon.social/tags/steamdeck.rss</code></li>
+<li><strong>Bluesky-profil-feeds</strong> — identifiser 5-10 nøkkel-profiler (UX-ledere, Anthropic-ansatte) og abonner via OpenRSS</li>
+<li><strong>Serendipitet-funksjon</strong> — én daglig wildcard-artikkel fra en ukjent kilde</li>
+</ol>
+
+<hr>
+
+<p style="color: #666; font-size: 0.85em;"><em>Rapport utarbeidet med aktiv bruk av WebSearch og WebFetch for å verifisere faktaopplysninger. Alle RSS-URL-er er kryssjekket mot primærkilder der mulig. Gemini RPD-tall basert på verifisert desember 2025-nedskjæring.</em></p>
+
+</body>
+</html>

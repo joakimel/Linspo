@@ -283,3 +283,57 @@ Start med **en monolittisk Next.js-app** som gjør alt. Splitt opp kun når et s
 - [Solo Developer Lessons 2025 (DEV.to)](https://dev.to/pipipi-dev/2025-year-in-review-lessons-from-solo-saas-development-3i08)
 - [GitHub Actions Cron Guide](https://cronjobpro.com/blog/github-actions-scheduled-workflows)
 - [Vercel Cron Docs](https://vercel.com/docs/cron-jobs/usage-and-pricing)
+
+---
+
+## Tillegg etter MVP-implementering (2026-05-15)
+
+Disse observasjonene kom fra reell bygging og testing av MVP-en. De er nye risikoer eller justeringer av eksisterende, ikke fra ekstern research.
+
+### A. Gemini free-tier er strengere enn dokumentert
+
+Dokumentasjonen sier 250 RPD for `gemini-2.5-flash` og 1000 RPD for `gemini-2.5-flash-lite`. På vårt nye Google Cloud-prosjekt observerte vi **20 RPD per modell** — sannsynligvis fordi prosjektet er "uverifisert" (ingen billing tilknyttet).
+
+**Konsekvens:** En enkelt testdag med flere cron-kjøringer tømte hele kvoten. Med 10 artikler per cron-kjøring betyr 20 RPD at vi maks kan kjøre cron to ganger om dagen.
+
+**Tiltak:**
+- Aktiver billing på Google Cloud (gir $300 gratis kreditt — har du kredittkort tilgjengelig, gjør dette tidlig)
+- Eller: bytt til Anthropic Claude API (Haiku 4.5 koster ~$0.50/mnd for tilsvarende volum)
+- Eller: aksepter begrensningen og kjør cron én gang om dagen kl. 05:00 UTC. Det er nok for MVP-bruk.
+
+### B. AI-fabrikasjon ved tynn input
+
+Når Gemini fikk kun artikkeltittel (ingen content), fabrikkerte den sammendrag basert på forhåndskunnskap. Eksempel: "A few words on DS4" ble feilaktig oppsummert som DualShock 4-kontrolleren, mens artikkelen faktisk handlet om DwarfStar 4-prosjektet på GitHub.
+
+**Tiltak:** Implementert i `lib/content/extract.ts` — henter `og:description`/`meta description`/`<p>`-fallback før AI-kallet. Pluss streng anti-fabrikasjons-prompt. Artikler uten hentbart innhold hoppes over. Se `ADR-002` for detaljer.
+
+### C. Reddit RSS-wrapper-problemet
+
+Reddit RSS gir bare wrapper-tekst ("brukeren X postet på r/Y, N kommentarer") for link-poster — ikke selve innholdet. Det betyr at AI ikke har noe meningsfullt å oppsummere.
+
+**Konsekvens:** Reddit som RSS-kilde gir konsekvent meningsløse sammendrag, uansett hvor god AI-modellen er.
+
+**Tiltak:** Alle Reddit-feeder fjernet fra `RSS_FEEDS` i `sources.ts`. Hvis Reddit-innhold ønskes senere, må vi enten:
+1. Hente faktisk postinnhold via Reddit JSON API (krever OAuth)
+2. Hardkode "skip link-poster, behold kun self-posts"
+3. Bruke topp-kommentarer som content-proxy (kompleks og fragil)
+
+### D. Bredt feed-format krever filtrering
+
+Tom's Hardware har ingen kategori-spesifikk RSS — de tilbyr én samlet feed med alt. ~90% av artiklene var irrelevante for våre fokusområder (CPU/GPU-benchmarks, generelle PC-tester).
+
+**Tiltak:** `RssFeedConfig.keywordFilter` lagt til i `lib/content/rss.ts`. Filtrerer på tittel + excerpt før AI-prosessering. For Tom's Hardware: `["handheld", "steam deck", "rog ally", "msi claw", "legion go", "ayaneo", "retroid", "ayn "]`.
+
+Dette mønsteret kan brukes på andre brede kilder (f.eks. The Verge-hovedfeed hvis vi tar den inn senere).
+
+### E. AI feilvurderer ofte underholdnings-content som høyverdig
+
+Selv med streng prompt, kan Gemini gi `learning_value: 7-8` til Reddit-memer eller humorpost (eksempel: "In Time (2011) was a documentary about Claude Pro users" — en spøk, ikke faglig innhold).
+
+**Tiltak:** `app/page.tsx` filtrerer på `learning_value >= 4`. Defense-in-depth — om AI feilvurderer, holdes lavkvalitetsinnhold ute likevel. Vurder å heve terskelen til 6 hvis det fortsatt slipper gjennom for mye støy.
+
+### F. Mappenavn med store bokstaver krenker npm-konvensjon
+
+`npx create-next-app` nekter å scaffolde hvis target-mappen har store bokstaver i navnet (npm-pakkenavn må være små bokstaver). Vår "Linspo"-mappe måtte døpes om til "linspo" på macOS via en to-stegs rename (`mv Linspo tmp && mv tmp linspo`) siden filsystemet er case-insensitive.
+
+**Tiltak:** Husk lowercase fra start på fremtidige prosjekter.

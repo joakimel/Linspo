@@ -5,7 +5,9 @@ Produktdefinisjon, krav og beslutningsdokumenter.
 ## Innhold
 
 - `Linspo_Outline_og_Konseptplan.md` — Hovedoutline med fasebeskrivelser (MVP → vekst)
-- `decisions/` — Architecture Decision Records (ADRs) *(opprettes når første ADR skrives)*
+- `decisions/` — Architecture Decision Records (ADRs):
+  - `ADR-001-mvp-tech-stack-og-scope.md` — Tech stack, strikt MVP-scope, rate-limit-strategi
+  - `ADR-002-innholds-pipeline-og-kilder.md` — Innholds-ekstraksjon, kilde-strategi, learning_value-filter
 
 ## ADR-format
 
