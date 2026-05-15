@@ -2,23 +2,25 @@
 
 Oppdateres løpende. Datoer er estimater, ikke forpliktelser.
 
-## Q2 2026 — Definisjon og fundament
+## Q2 2026 — Definisjon og fundament ✅
 
 **Mål:** Forstå problemet godt nok til å bygge riktig ting.
 
-- Gjennomfør konkurranseanalyse av 5-8 relevante produkter
-- Definer primær brukergruppe og nøkkelbehov
-- Velg tech stack og sett opp utviklingsmiljø
-- Skriv MVP-spec
+- ✅ Konkurranseanalyse i `01-research/competitor_analysis.md`
+- ✅ Primær brukergruppe og behov definert
+- ✅ Tech stack valgt (se `ADR-001`)
+- ✅ MVP-spec i `02-documentation/Linspo_Outline_og_Konseptplan.md`
+- ✅ Lokal MVP scaffoldet og fungerer end-to-end (2026-05-15)
 
 ## Q3 2026 — MVP
 
 **Mål:** Et fungerende produkt som løser én ting bra.
 
-- Innhenting fra minst 3 kildetyper (RSS, API, scraping)
-- Brukerinteresseprofil
-- Daglig digest — enkelt og lesbart
-- Deploy til produksjon
+- ✅ Innhenting fra HackerNews (Algolia API) — Fase 1 ferdig
+- ⏳ Deploy til produksjon (Cloudflare Pages + GitHub Actions cron) — Fase 6 i planen
+- ⏳ Flere innholdskilder: Guardian, DEV.to, RSS — Fase 2
+- ⏳ Brukerinteresseprofil (krever auth) — Fase 2
+- ⏳ Daglig digest med ukentlig oppsummering — Fase 3
 
 ## Q4 2026 og fremover
 
@@ -30,4 +32,4 @@ Oppdateres løpende. Datoer er estimater, ikke forpliktelser.
 
 ---
 
-*Sist oppdatert: 2026-05-13*
+*Sist oppdatert: 2026-05-15*

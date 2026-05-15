@@ -4,33 +4,53 @@
 
 Linspo henter relevant innhold basert på brukerens interesser, prioriterer faglig verdi over clickbait, og gjør passiv konsumering om til aktiv læring.
 
-## Hva Linspo skal gjøre
-
-- Hente og filtrere innhold fra relevante kilder daglig
-- Presentere innhold i et lettfordøyelig format
-- Lage ukentlige oppsummeringer
-- Foreslå konkrete oppgaver og refleksjoner for å forankre kunnskap
-- Støtte både faglige interesser (UX, AI, design systems) og hobbyer
-
-## Mål
-
-Hjelpe brukeren å holde seg oppdatert uten informasjonsoverload, og gjøre det personlig, motiverende og intelligent.
-
----
-
-## Mappestruktur
-
-| Mappe | Innhold |
-|---|---|
-| `01-research/` | Brukerundersøkelse, konkurranseanalyse, markedsinnsikt, rapporten |
-| `02-documentation/` | Produktoutline, krav, beslutningsdokumenter (ADRs) |
-| `03-design/` | UX-anbefalinger, interaksjonsmønstre, visuelle trender |
-| `04-planning/` | Roadmap, backlog, milepæler |
-| `05-resources/` | Referanser, inspirasjon, lenker |
-| `06-dev/` | Teknisk dokumentasjon: arkitektur, infra, PWA, AI-integrasjon |
-
-Når Next.js-appen scaffoldes, vil koden ligge på **rotnivå** (`app/`, `components/`, `lib/`, `package.json` osv.) — ikke inne i `06-dev/`.
-
 ## Status
 
-🟡 Tidlig fase — research og konsept ferdig, tech stack vedtatt (se `06-dev/`). Neste steg: scaffolde Next.js + Supabase MVP.
+🟢 **Lokal MVP fungerer.** Pipeline kjører end-to-end: HackerNews → Gemini 2.5 Flash → Supabase → forside. Strikt MVP — én bruker (Joakim), uten auth, kun HackerNews. Deploy til Cloudflare Pages gjenstår.
+
+Se `CLAUDE.md` for full prosjektkontekst, `02-documentation/decisions/ADR-001-*` for tech-stack-beslutninger, og `02-documentation/Linspo_Outline_og_Konseptplan.md` for fasebeskrivelse.
+
+## Tech stack
+
+Next.js 16 (App Router) · TypeScript · Tailwind v4 · Supabase (Postgres) · Gemini 2.5 Flash · Cloudflare Pages (planlagt) · GitHub Actions (cron)
+
+## Kjøre lokalt
+
+```bash
+npm install
+cp .env.example .env.local
+# Fyll inn SUPABASE_SECRET_KEY og GEMINI_API_KEY i .env.local
+npm run dev
+```
+
+Åpne [http://localhost:3000](http://localhost:3000).
+
+### Manuell trigger av cron-jobben
+
+```bash
+source .env.local
+curl -X POST http://localhost:3000/api/cron/fetch-content \
+  -H "Authorization: Bearer $CRON_SECRET"
+```
+
+## Kodestruktur
+
+```
+app/                          Next.js App Router
+  api/cron/fetch-content/     POST-endepunkt som henter HN → Gemini → Supabase
+  page.tsx                    Daglig feed (server-rendered)
+components/                   Presenterende UI-komponenter
+lib/
+  ai/gemini.ts                Gemini Flash-wrapper med JSON-output
+  content/hackernews.ts       HN Algolia API-klient
+  content/fetch-pipeline.ts   Orchestrerer: HN → AI → DB
+  types.ts                    Delte TypeScript-typer
+utils/supabase/
+  server.ts                   Server-klient (publishable key, read-only)
+  admin.ts                    Admin-klient (secret key, kun cron)
+supabase/migrations/          SQL-migrasjoner
+```
+
+## Dokumentasjon
+
+Konsept og planlegging ligger i `01-research/` til `06-dev/`. Se rot-mappens README-er for innholdet i hver.
