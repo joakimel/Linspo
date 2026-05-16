@@ -8,6 +8,7 @@ Produktdefinisjon, krav og beslutningsdokumenter.
 - `decisions/` — Architecture Decision Records (ADRs):
   - `ADR-001-mvp-tech-stack-og-scope.md` — Tech stack, strikt MVP-scope, rate-limit-strategi
   - `ADR-002-innholds-pipeline-og-kilder.md` — Innholds-ekstraksjon, kilde-strategi, learning_value-filter
+  - `ADR-003-kilde-oppdagelse-og-brukerkontroll.md` — Generelt discovery-system, fjernet dødvekt-strategier, bruker-godkjenning, manuell kildelegging, paywall-deteksjon
 
 ## ADR-format
 
