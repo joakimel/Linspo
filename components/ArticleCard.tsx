@@ -1,5 +1,6 @@
 import type { ArticleWithFeedback, ArticleFeedback } from "@/lib/types";
 import { getFeedback } from "@/lib/types";
+import { formatShortDateNb } from "@/lib/date";
 import { ArticleActions } from "./ArticleActions";
 
 interface Props {
@@ -53,6 +54,12 @@ export function ArticleCard({ article, archive = false }: Props) {
                 </span>
               ))}
             </div>
+          )}
+
+          {article.published_at && (
+            <span title="Publiseringsdato">
+              Publisert {formatShortDateNb(new Date(article.published_at))}
+            </span>
           )}
 
           {article.reading_time !== null && (
