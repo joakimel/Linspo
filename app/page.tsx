@@ -2,7 +2,10 @@ import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { ArticleCard } from "@/components/ArticleCard";
 import type { Article } from "@/lib/types";
 
-export const revalidate = 300;
+// Force-dynamic så build ikke pre-renderer (env-variabler er ikke tilgjengelig
+// ved build-tid i Cloudflare). Cloudflare/CDN-cacheing kan håndteres senere
+// via response headers hvis vi vil.
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const supabase = createSupabaseServerClient();
