@@ -1,4 +1,5 @@
 import type { ArticleWithFeedback, ArticleFeedback } from "@/lib/types";
+import { getFeedback } from "@/lib/types";
 import { ArticleActions } from "./ArticleActions";
 
 interface Props {
@@ -14,7 +15,7 @@ const REACTION_ICON: Record<ArticleFeedback["reaction"], string> = {
 };
 
 export function ArticleCard({ article, archive = false }: Props) {
-  const feedback = Array.isArray(article.feedback) ? article.feedback[0] : null;
+  const feedback = getFeedback(article);
 
   return (
     <article className="rounded-lg border border-neutral-200 p-5 transition hover:border-neutral-400 dark:border-neutral-800 dark:hover:border-neutral-600">

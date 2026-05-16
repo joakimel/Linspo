@@ -29,9 +29,22 @@ export interface ArticleFeedback {
   updated_at: string;
 }
 
-/** Article + tilhørende feedback (kommer som array fra PostgREST join) */
+/**
+ * Article + tilhørende feedback.
+ *
+ * PostgREST returnerer feedback som enkelt objekt (ikke array) når
+ * `article_feedback.article_id` har UNIQUE-constraint (1-til-1-relasjon).
+ * Vi godtar begge typer for robusthet — bruk getFeedback() for å normalisere.
+ */
 export interface ArticleWithFeedback extends Article {
-  feedback?: ArticleFeedback[] | null;
+  feedback?: ArticleFeedback | ArticleFeedback[] | null;
+}
+
+export function getFeedback(article: ArticleWithFeedback): ArticleFeedback | null {
+  const f = article.feedback;
+  if (!f) return null;
+  if (Array.isArray(f)) return f[0] ?? null;
+  return f;
 }
 
 export interface AISummary {

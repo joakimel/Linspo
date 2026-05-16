@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { createSupabaseServerClient } from "@/utils/supabase/server";
 import { ArticleCard } from "@/components/ArticleCard";
-import type { ArticleWithFeedback } from "@/lib/types";
+import { getFeedback, type ArticleWithFeedback } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +40,7 @@ function buildStats(articles: ArticleWithFeedback[]): ArchiveStats {
       lvCount++;
     }
 
-    const fb = Array.isArray(a.feedback) ? a.feedback[0] : null;
+    const fb = getFeedback(a);
     if (!fb) withoutFeedback++;
     else if (fb.reaction === "positive") positive++;
     else if (fb.reaction === "neutral") neutral++;
