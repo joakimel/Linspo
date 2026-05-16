@@ -22,8 +22,13 @@ export default async function HomePage() {
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
       <header className="mb-10">
-        <h1 className="text-3xl font-semibold tracking-tight">Linspo</h1>
-        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo.svg"
+          alt="Linspo"
+          className="h-12 w-auto dark:invert"
+        />
+        <p className="mt-4 text-sm text-neutral-600 dark:text-neutral-400">
           Din daglige pakke med faglig innhold.
         </p>
       </header>
