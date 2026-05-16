@@ -1,10 +1,21 @@
-import type { Article } from "@/lib/types";
+import type { ArticleWithFeedback, ArticleFeedback } from "@/lib/types";
+import { ArticleActions } from "./ArticleActions";
 
 interface Props {
-  article: Article;
+  article: ArticleWithFeedback;
+  /** Hvis true: vis feedback som read-only + lest-dato, ingen interaktive knapper */
+  archive?: boolean;
 }
 
-export function ArticleCard({ article }: Props) {
+const REACTION_ICON: Record<ArticleFeedback["reaction"], string> = {
+  positive: "👍",
+  neutral: "😐",
+  negative: "👎",
+};
+
+export function ArticleCard({ article, archive = false }: Props) {
+  const feedback = Array.isArray(article.feedback) ? article.feedback[0] : null;
+
   return (
     <article className="rounded-lg border border-neutral-200 p-5 transition hover:border-neutral-400 dark:border-neutral-800 dark:hover:border-neutral-600">
       <a
@@ -58,6 +69,44 @@ export function ArticleCard({ article }: Props) {
           )}
         </div>
       </a>
+
+      {archive ? (
+        <ArchiveFeedbackView article={article} feedback={feedback} />
+      ) : (
+        <ArticleActions
+          articleId={article.id}
+          initialReaction={feedback?.reaction ?? null}
+          initialNote={feedback?.note ?? null}
+        />
+      )}
     </article>
+  );
+}
+
+function ArchiveFeedbackView({
+  article,
+  feedback,
+}: {
+  article: ArticleWithFeedback;
+  feedback: ArticleFeedback | null;
+}) {
+  const readDate = article.read_at
+    ? new Date(article.read_at).toLocaleDateString("nb-NO", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
+
+  return (
+    <div className="mt-4 border-t border-neutral-200 pt-3 text-xs text-neutral-500 dark:border-neutral-800 dark:text-neutral-400">
+      {readDate && <span>Lest {readDate}</span>}
+      {feedback && (
+        <span className="ml-3">
+          {REACTION_ICON[feedback.reaction]}
+          {feedback.note && <span className="ml-2 italic">«{feedback.note}»</span>}
+        </span>
+      )}
+    </div>
   );
 }

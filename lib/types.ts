@@ -1,4 +1,5 @@
 export type Difficulty = "beginner" | "intermediate" | "advanced";
+export type Reaction = "positive" | "neutral" | "negative";
 
 export interface Article {
   id: string;
@@ -16,6 +17,21 @@ export interface Article {
   published_at: string | null;
   fetched_at: string;
   ai_processed: boolean;
+  read_at: string | null;
+}
+
+export interface ArticleFeedback {
+  id: string;
+  article_id: string;
+  reaction: Reaction;
+  note: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Article + tilhørende feedback (kommer som array fra PostgREST join) */
+export interface ArticleWithFeedback extends Article {
+  feedback?: ArticleFeedback[] | null;
 }
 
 export interface AISummary {
