@@ -6,13 +6,13 @@ Linspo henter relevant innhold basert på brukerens interesser, prioriterer fagl
 
 ## Status
 
-🟢 **Lokal MVP fungerer.** Pipeline kjører end-to-end: HackerNews → Gemini 2.5 Flash → Supabase → forside. Strikt MVP — én bruker (Joakim), uten auth, kun HackerNews. Deploy til Cloudflare Pages gjenstår.
+🟢 **SOLO-MVP deployet** (2026-05-16) — live på `https://linspo.joakim-m-elden.workers.dev`. Joakim som eneste bruker, daglig automatisk innhenting, lest-status og 3-veis feedback på plass. Fase 2 (auth + flere brukere) kommer etter 1-2 ukers bruk og analyse av feedback-data.
 
-Se `CLAUDE.md` for full prosjektkontekst, `02-documentation/decisions/ADR-001-*` for tech-stack-beslutninger, og `02-documentation/Linspo_Outline_og_Konseptplan.md` for fasebeskrivelse.
+Se `CLAUDE.md` for full prosjektkontekst, `02-documentation/decisions/` for alle ADR-er, og `02-documentation/Linspo_Outline_og_Konseptplan.md` for opprinnelig fasebeskrivelse.
 
 ## Tech stack
 
-Next.js 16 (App Router) · TypeScript · Tailwind v4 · Supabase (Postgres) · Gemini 2.5 Flash · Cloudflare Pages (planlagt) · GitHub Actions (cron)
+Next.js 16 (App Router) · TypeScript · Tailwind v4 · Supabase (Postgres, EU) · Gemini 2.5 Flash Lite · Cloudflare Worker via OpenNext · GitHub Actions cron
 
 ## Kjøre lokalt
 
@@ -20,37 +20,42 @@ Next.js 16 (App Router) · TypeScript · Tailwind v4 · Supabase (Postgres) · G
 npm install
 cp .env.example .env.local
 # Fyll inn SUPABASE_SECRET_KEY og GEMINI_API_KEY i .env.local
-npm run dev
-```
 
-Åpne [http://localhost:3000](http://localhost:3000).
-
-### Manuell trigger av cron-jobben
-
-```bash
-source .env.local
-curl -X POST http://localhost:3000/api/cron/fetch-content \
-  -H "Authorization: Bearer $CRON_SECRET"
+npm run dev                            # dev server på localhost:3000
+npx tsc --noEmit                       # type-check
+npx tsx scripts/run-cron.ts            # kjør pipeline lokalt
 ```
 
 ## Kodestruktur
 
 ```
-app/                          Next.js App Router
-  api/cron/fetch-content/     POST-endepunkt som henter HN → Gemini → Supabase
-  page.tsx                    Daglig feed (server-rendered)
-components/                   Presenterende UI-komponenter
+app/                                 Next.js App Router
+  page.tsx                           Daglig feed (force-dynamic)
+  arkiv/page.tsx                     Leste artikler + stats
+  privacy/page.tsx                   Personvernerklæring
+  api/articles/[id]/{read,feedback}  Bruker-aksjoner
+  api/cron/fetch-content             Manuell cron-trigger
+components/
+  ArticleCard.tsx                    Server-komponent
+  ArticleActions.tsx                 Client — reaksjoner + lest-knapp
 lib/
-  ai/gemini.ts                Gemini Flash-wrapper med JSON-output
-  content/hackernews.ts       HN Algolia API-klient
-  content/fetch-pipeline.ts   Orchestrerer: HN → AI → DB
-  types.ts                    Delte TypeScript-typer
-utils/supabase/
-  server.ts                   Server-klient (publishable key, read-only)
-  admin.ts                    Admin-klient (secret key, kun cron)
-supabase/migrations/          SQL-migrasjoner
+  ai/gemini.ts                       Gemini-wrapper
+  content/                           Pipeline (sources, extract, fetch-pipeline)
+  content/discovery/                 Kilde-oppdagelses-system + paywall-detector
+  date.ts, types.ts
+scripts/run-cron.ts                  Standalone Node-cron
+utils/supabase/                      Server- og admin-klienter
+supabase/migrations/                 SQL-migrasjoner
+.github/workflows/daily-fetch.yml    GitHub Actions cron
 ```
 
 ## Dokumentasjon
 
-Konsept og planlegging ligger i `01-research/` til `06-dev/`. Se rot-mappens README-er for innholdet i hver.
+| Mappe | Innhold |
+|---|---|
+| `01-research/` | Markedsanalyse, konkurrentanalyse, agentrapporter om kilder + AI-bruk |
+| `02-documentation/` | Outline, konseptplan, ADR-001 til ADR-005 |
+| `03-design/` | UX-anbefalinger, interaksjonsmønstre, visuelle valg |
+| `04-planning/` | Roadmap |
+| `05-resources/` | Referanser og inspirasjon |
+| `06-dev/` | Teknisk dokumentasjon: arkitektur, infra, AI, gotchas |

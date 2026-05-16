@@ -1,92 +1,108 @@
 # Linspo — Claude Code briefing
 
-Personlig faglig kurator og læringsassistent. PWA som henter kuratert innhold daglig, lager AI-sammendrag, foreslår læringsoppgaver og leverer ukentlig digest. Eier: Joakim Eldén.
+Personlig faglig kurator og læringsassistent. PWA som henter kuratert innhold daglig, lager AI-sammendrag, og lar brukeren markere lest + gi 3-veis feedback. Eier: Joakim Eldén.
 
-## Status (2026-05-15)
+## Status (2026-05-16)
 
-🟢 **Lokal MVP fungerer end-to-end.** Multi-kilde pipeline → Gemini-summarizer (med innholds-ekstraktor for å unngå hallusinering) → Supabase → forside med kuratert kortliste sortert på relevans.
+🟢 **SOLO-MVP er deployet og kjører i produksjon.**
 
-**Gjenstår:** Deploy til Cloudflare Pages + GitHub Actions cron + UptimeRobot. Se Fase 6 i `bright-whistling-perlis`-planen og `ADR-001`.
+- Live på `https://linspo.joakim-m-elden.workers.dev`
+- Daglig cron-jobb (07:00 norsk tid) henter automatisk nye artikler
+- Feedback-system med "marker som lest", 3-veis reaksjoner, tekst-kommentar
+- /arkiv-side med stats og leste artikler
+- /privacy-side med personvernerklæring
+
+**Neste fase (om 1-2 uker):** Analyser feedback-data, bygg AI-vekting basert på mønstre. Deretter Fase 2 (auth, onboarding, flere brukere).
 
 ## Hva som er bygget
 
 ```
-app/api/cron/fetch-content/route.ts   POST-endepunkt, auth via CRON_SECRET
-app/page.tsx                          Daglig feed (SSR, ISR revalidate=300)
-components/ArticleCard.tsx            Kort med tittel, sammendrag, key takeaway, tags
-lib/ai/gemini.ts                      Gemini-wrapper. Streng anti-fabrikasjons-prompt.
-lib/content/sources.ts                Aggregator. Henter alle kilder parallelt, interleaver
-lib/content/hackernews.ts             HN Algolia, multi-topic-søk (UX, Claude, gaming, handhelds)
-lib/content/rss.ts                    Generisk RSS/Atom-parser (fast-xml-parser)
-lib/content/extract.ts                Henter URL, plukker ut og:description / meta description / <p>
-lib/content/fetch-pipeline.ts         Orchestrerer: kilder → extract → AI → DB med rate-limit-throttling
-lib/content/content-hash.ts           SHA-256 for dedupe
-lib/types.ts                          Article, AISummary, FetchedArticle
-utils/supabase/server.ts              Read-only klient (publishable key)
-utils/supabase/admin.ts               Skrive-klient (secret key, kun cron)
-supabase/migrations/0001_*.sql        articles-tabell + RLS-policy
+app/
+  page.tsx                              Forside — dagens feed (force-dynamic)
+  arkiv/page.tsx                        Arkiv — leste artikler + stats
+  privacy/page.tsx                      Personvernerklæring
+  layout.tsx                            Root layout (Geist font, norsk lang)
+  globals.css                           Tailwind v4 + dark mode
+  api/cron/fetch-content/route.ts       Manuell cron-trigger via HTTP (Bearer auth)
+  api/articles/[id]/read/route.ts       POST = marker lest, DELETE = angre
+  api/articles/[id]/feedback/route.ts   POST = upsert reaksjon+note, DELETE = slett
+
+components/
+  ArticleCard.tsx                       Server — viser kort, har "archive"-modus
+  ArticleActions.tsx                    Client ("use client") — reaksjons-UI + lest-knapp
+
+lib/
+  ai/gemini.ts                          Gemini 2.5 Flash Lite wrapper, anti-fabrikasjon
+  content/
+    fetch-pipeline.ts                   Orchestrerer: kilder → extract → AI → DB
+    sources.ts                          Aggregator (HN topic-søk + 8 RSS-feeder, interleavet)
+    hackernews.ts                       HN Algolia, 8 topic-søk parallelt
+    rss.ts                              Generisk RSS/Atom-parser + keywordFilter
+    extract.ts                          og:description / meta description / <p>-fallback
+    content-hash.ts                     SHA-256 for dedupe
+    discovery/                          Generelt kilde-oppdagelses-system (Fase 2-fundament)
+      index.ts, cli.ts, rank.ts, verify.ts, types.ts
+      manual.ts, manual-cli.ts          Validering for brukerlagte kilder
+      paywall.ts                        Paywall-deteksjon
+      strategies/                       6 strategier (wikipedia, llm-suggest, mastodon,
+                                        reddit, awesome-lists, hn-algolia)
+  date.ts                               Norske dato-hjelpere (isoWeekNumber, formatXxx)
+  types.ts                              Article, ArticleWithFeedback, getFeedback() helper
+
+scripts/
+  run-cron.ts                           Standalone Node-script for GitHub Actions cron
+
+utils/supabase/
+  server.ts                             Read-only klient (publishable key)
+  admin.ts                              Skrive-klient (secret key)
+
+supabase/migrations/
+  0001_initial_schema.sql               articles + RLS
+  0002_feedback_and_read_state.sql      read_at + article_feedback
+
+.github/workflows/
+  daily-fetch.yml                       GitHub Actions cron, Node 22, 05:00 UTC
+
+open-next.config.ts                     OpenNext Cloudflare adapter
+wrangler.jsonc                          Cloudflare Worker config (nodejs_compat)
+public/logo.svg                         Linspo wordmark
 ```
-
-## Innholdskilder (per 2026-05-15)
-
-| Kilde | Hva | Hvordan |
-|---|---|---|
-| HackerNews | UX, design systems, Claude Code, Anthropic, Steam Deck, MSI Claw, ROG Ally, handheld gaming | Algolia API, 8 topic-søk parallelt |
-| Reddit `/r/UXDesign` | UX-diskusjoner | RSS top-of-week |
-| Reddit `/r/ClaudeAI` | Claude-fellesskap | RSS top-of-week |
-| Reddit `/r/SteamDeck` | Steam Deck | RSS top-of-week |
-| Reddit `/r/SBCGaming` | Håndholdte (inkl. MSI Claw, ROG Ally) | RSS top-of-week |
-| Reddit `/r/handheldpcgaming` | Gaming-PCer i håndholdt-formfaktor | RSS top-of-week |
-| The Verge Gaming | Gaming-nyheter | RSS |
-| Polygon | Gaming-nyheter | RSS |
-
-Legg til/fjern kilder i `lib/content/sources.ts → RSS_FEEDS`.
-
-## Gemini-modell
-
-Bruker `gemini-2.5-flash-lite` for utvikling (15 RPM, 1000 RPD free tier). Bytt tilbake til `gemini-2.5-flash` i `lib/ai/gemini.ts` for høyere kvalitet i produksjon — men husk å øke `GEMINI_THROTTLE_MS` til 13s siden flash bare har 5 RPM.
 
 ## Vedtatt stack
 
 - **Frontend:** Next.js 16.2.6 (App Router, Turbopack) + TypeScript + Tailwind v4
-- **DB + Auth:** Supabase (Postgres), region `eu-central-1` (Frankfurt)
-- **AI:** Gemini 2.5 Flash (5 RPM gratis-tier → 13s throttle mellom kall)
-- **Cron:** GitHub Actions (planlagt — se note om Cloudflare-timeout under)
-- **Hosting:** Cloudflare Pages (planlagt)
-- **E-post (Fase 3):** Resend.com
+- **Hosting:** Cloudflare Worker via `@opennextjs/cloudflare`
+- **DB:** Supabase (Postgres) i `eu-central-1` (Frankfurt)
+- **AI:** Gemini 2.5 Flash Lite (15 RPM, 1000 RPD free tier)
+- **Cron:** GitHub Actions Node 22 (ikke Cloudflare-endepunkt — Workers har 30s-timeout)
 
-Full arkitektur og databaseskjema: `06-dev/architecture_proposal.md`.
-ADR med begrunnelser for valgene: `02-documentation/decisions/ADR-001-mvp-tech-stack-og-scope.md`.
-Outline: `02-documentation/Linspo_Outline_og_Konseptplan.md`.
+Detaljerte beslutninger: ADR-001 til ADR-005 i `02-documentation/decisions/`.
 
-## Mappestruktur
+## Innholdskilder (per 2026-05-16)
 
-```
-app/, components/, lib/, utils/  Next.js-koden (rot)
-supabase/migrations/             SQL-migrasjoner
-01-research/                     Research, konkurranseanalyse
-02-documentation/                Outline + ADR-er
-03-design/                       UX, interaksjon, visuelle valg
-04-planning/                     Roadmap
-05-resources/                    Referanser, inspirasjon
-06-dev/                          Teknisk dokumentasjon (ikke kildekode)
-```
+Hardkodede kilder i SOLO-MVP (`lib/content/sources.ts`). Brukerlagte kilder + discovery-systemet aktiveres i Fase 2.
+
+| Kilde | Type | Hva |
+|---|---|---|
+| HackerNews | Algolia API, 8 topic-søk | UX, design systems, Claude Code, Anthropic, Steam Deck, MSI Claw, ROG Ally, handheld gaming |
+| Smashing Magazine | RSS | UX/UI/frontend |
+| UX Collective (uxdesign.cc) | RSS | UX-metodikk |
+| Nielsen Norman Group | RSS | Brukerinnsikt-research |
+| Retro Handhelds | RSS | Håndholdte spillkonsoller |
+| Liliputing | RSS | Håndholdte, mini-PCer |
+| Tom's Hardware | RSS + keywordFilter | Bredt tech, filtrert på handheld-emner |
+| Gaming On Linux | RSS | Linux + Steam Deck gaming |
+| The Verge Tech | RSS | Bredt tech inkl. AI/handhelds |
+| The Verge Gaming | RSS | Gaming-nyheter |
 
 ## Kritiske prinsipper
 
 - **Språk:** Norsk i UI, README-er, ADR-er, commit-meldinger. Engelsk i kode-identifikatorer.
-- **Fargeblindhet:** Joakim er fargeblind. Bruk ALDRI rød/grønn som eneste distinktor — kombiner alltid med form, ikon eller tekst. Streak-/aksent-farger: indigo (`#4f46e5` / Tailwind `indigo-500`).
-- **Kostnadsmål:** $0/mnd i MVP-fasen. Hold deg innenfor gratis-tier (Supabase, Gemini, Cloudflare, GitHub Actions).
-- **Personvern:** Supabase i EU-region. DPA må sjekkes med Supabase og Google før produksjonsbruk.
-- **Sikkerhet:** RLS aktivert på alle Supabase-tabeller. `CRON_SECRET`, `SUPABASE_SECRET_KEY` og `GEMINI_API_KEY` kun i `.env.local` (gitignored) og deploy-secrets.
-- **Rate limit:** Gemini Flash gratis-tier er 5 RPM. Hvis du øker `maxToProcess` eller fjerner sleep, vil deler av batchen feile med 429.
-
-## Det vi IKKE skal gjøre (ennå)
-
-- Microservices, Kubernetes, event sourcing — monolitt er riktig nå.
-- Push-notifikasjoner på iOS i EU/EØS (DMA-begrensning) — bruk e-post i stedet.
-- Leaderboards — feil kontekst for faglig læring.
-- Skalere arkitektur før 500 aktive brukere.
+- **Fargeblindhet:** Joakim er fargeblind. ALDRI rød/grønn som eneste distinktor — kombiner med form/ikon/tekst. Streak-/aksent-farger: indigo.
+- **Kostnadsmål:** $0/mnd. Holder Supabase, Gemini, Cloudflare, GitHub Actions innenfor free tier.
+- **Personvern:** Supabase i EU-region. DPA må sjekkes med Google (Gemini) før Fase 2.
+- **Sikkerhet:** RLS på alle Supabase-tabeller. Secret keys kun i `.env.local` + Cloudflare/GitHub secrets.
+- **AI-output-validering:** Pipeline har anti-fabrikasjons-prompt + content extraction. Sett `learning_value >= 4` som forside-filter mot AI-feilvurderinger.
 
 ## Kjøre lokalt
 
@@ -94,14 +110,36 @@ supabase/migrations/             SQL-migrasjoner
 npm install
 cp .env.example .env.local
 # Fyll inn SUPABASE_SECRET_KEY og GEMINI_API_KEY
-npm run dev
 
-# Trigge cron manuelt (henter ~10 nye artikler, tar ~2.5 min):
-set -a && source .env.local && set +a
-curl -X POST http://localhost:3000/api/cron/fetch-content \
-  -H "Authorization: Bearer $CRON_SECRET"
+npm run dev                            # dev server på localhost:3000
+npx tsc --noEmit                       # type-check
+npm run build && npx opennextjs-cloudflare build  # full produksjons-build
+npx tsx scripts/run-cron.ts            # kjør pipeline lokalt (henter+lagrer artikler)
+
+# Discovery-CLI (Fase 2-fundament, ikke aktivt i SOLO-MVP):
+npx tsx lib/content/discovery/cli.ts "topic"
+npx tsx lib/content/discovery/manual-cli.ts <url>
 ```
+
+## Deployment
+
+- **Cloudflare:** Auto-deploys ved push til `main` via Workers Builds-integrasjon. URL: `https://linspo.joakim-m-elden.workers.dev`
+- **Cron:** GitHub Actions kjører `.github/workflows/daily-fetch.yml` automatisk hver morgen kl. 05:00 UTC, eller manuelt via Actions-fanen.
+
+## Det som UTSETTES (post-MVP, Fase 2+)
+
+- Auth (Supabase Auth, Google OAuth)
+- Onboarding med interesse-velger og discovery-integrasjon
+- Brukerlagte kilder (form i UI, schema for `user_topics`/`user_topic_sources`)
+- AI-vekting basert på feedback-data (kommer etter 1-2 uker med ekte data)
+- Ukentlig digest via e-post (Resend)
+- PWA-installasjon + Serwist
+- UptimeRobot keep-alive
 
 ## Neste konkrete steg
 
-Fase 6 i planen: **Deploy + produksjons-cron.** Spesielt: bestem om cron skal være GitHub Actions med Node-runner (anbefalt) eller chunked Cloudflare cron. Se `ADR-001 → Konsekvenser` for detaljer.
+Joakim bruker SOLO-MVP-en i 1-2 uker, gir feedback naturlig. Etter det:
+1. Analyser feedback-data i Supabase SQL Editor
+2. Identifiser mønstre (kilder/tags som scorer høyt/lavt, prompt-treff vs. miss)
+3. Skriv ADR-006 for valgt vektings-strategi
+4. Implementer i `fetch-pipeline.ts` (sannsynligvis i `lib/content/sources.ts` for vekting)

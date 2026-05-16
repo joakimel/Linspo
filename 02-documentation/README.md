@@ -9,6 +9,8 @@ Produktdefinisjon, krav og beslutningsdokumenter.
   - `ADR-001-mvp-tech-stack-og-scope.md` — Tech stack, strikt MVP-scope, rate-limit-strategi
   - `ADR-002-innholds-pipeline-og-kilder.md` — Innholds-ekstraksjon, kilde-strategi, learning_value-filter
   - `ADR-003-kilde-oppdagelse-og-brukerkontroll.md` — Generelt discovery-system, fjernet dødvekt-strategier, bruker-godkjenning, manuell kildelegging, paywall-deteksjon
+  - `ADR-004-solo-mvp-deploy.md` — OpenNext + Cloudflare Worker, GitHub Actions Node 22 cron, force-dynamic-render
+  - `ADR-005-lest-status-og-feedback.md` — read_at-felt, article_feedback-tabell, 3-veis reaksjoner, arkiv-side, ingen AI-tilpasning ennå
 
 ## ADR-format
 
