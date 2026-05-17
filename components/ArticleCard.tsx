@@ -11,7 +11,7 @@ interface Props {
 
 const REACTION_ICON: Record<ArticleFeedback["reaction"], string> = {
   positive: "👍",
-  neutral: "😐",
+  neutral: "🤷",
   negative: "👎",
 };
 

@@ -11,6 +11,7 @@ export default async function HomePage() {
   const now = new Date();
   const week = isoWeekNumber(now);
   const dateLabel = formatFullDateNb(now);
+  const limit = Number(process.env.LINSPO_DAILY_LIMIT) || 20;
 
   const { data: articles, error } = await supabase
     .from("articles")
@@ -20,7 +21,7 @@ export default async function HomePage() {
     .is("read_at", null)
     .order("fetched_at", { ascending: false })
     .order("learning_value", { ascending: false })
-    .limit(20);
+    .limit(limit);
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
@@ -37,7 +38,7 @@ export default async function HomePage() {
               className="mt-2 h-12 w-auto dark:invert"
             />
             <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
-              Din daglige pakke med faglig innhold.
+              Linspo: just your interest, no distractions.
             </p>
           </div>
           <Link

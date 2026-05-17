@@ -12,7 +12,7 @@ interface Props {
 
 const REACTIONS: Array<{ value: Reaction; label: string; aria: string }> = [
   { value: "positive", label: "👍 Bra", aria: "Positiv" },
-  { value: "neutral", label: "😐 OK", aria: "Nøytral" },
+  { value: "neutral", label: "🤷 OK", aria: "Nøytral" },
   { value: "negative", label: "👎 Dårlig", aria: "Negativ" },
 ];
 

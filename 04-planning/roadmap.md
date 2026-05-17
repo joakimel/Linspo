@@ -24,25 +24,29 @@ Oppdateres løpende. Datoer er estimater, ikke forpliktelser.
 - ✅ Privacy policy
 - ⏳ UptimeRobot keep-alive (utstilt — settes opp ved første Supabase-pause-symptom)
 - ⏳ AI-vekting basert på feedback-data (etter 1-2 uker med ekte data)
+- ⏳ `/uke`-side med ukentlig leserapport + 3 AI-genererte retropunkter (bruker eksisterende feedback-data)
 
 ## Q4 2026 — Fase 2: Personalisering for flere brukere
 
 **Mål:** Klar for 2-5 testbrukere.
 
 - Supabase Auth (Google OAuth + e-post)
-- Onboarding med interesse-velger
+- Onboarding med interesse-velger + sliders for interesse-nivå per tema
 - Integrere discovery-system (`lib/content/discovery/`) i onboarding
+- AI-drevet kilde-rotasjon — aktivér discovery-systemet til å foreslå nye kilder ukentlig basert på feedback-mønstre (gode kilder beholdes, dårlige roteres ut)
 - Brukerlagte kilder med paywall-validering (`validateManualSource`)
 - Per-bruker schema (user_topics, user_topic_sources)
+- Ko-fi donasjons-knapp øverst på forsiden (krever ekstern konto-oppsett)
 - "Slett konto"-funksjon (GDPR)
 
 ## 2027 — Fase 3: Vanebygging og digest
 
 - Bento-grid hjemskjerm
 - Lesestreak
-- Ukentlig e-post-digest (Resend.com)
+- Ukentlig e-post-digest (Resend.com) — sender ukerapporten fra Fase 2 som e-post
 - PWA-installasjon + Serwist
 - Refleksjons-prompts og ukentlig læringsrapport
+- Native app-bygg (Capacitor eller Tauri) med in-app webview for artikler
 
 ---
 

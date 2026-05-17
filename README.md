@@ -24,7 +24,35 @@ cp .env.example .env.local
 npm run dev                            # dev server på localhost:3000
 npx tsc --noEmit                       # type-check
 npx tsx scripts/run-cron.ts            # kjør pipeline lokalt
+npx tsx scripts/status-report.ts       # bruksrapport (artikler, feedback, kommentarer)
 ```
+
+## Dev vs. produksjon
+
+To Supabase-prosjekter og to git-branches holder utviklingsarbeidet separert fra MVP-en:
+
+- **Produksjon** — branch `main`, URL `https://linspo.joakim-m-elden.workers.dev`, `Linspo-prod` Supabase-prosjekt, daglig cron via GitHub Actions kl. 07:00.
+- **Dev** — branch `dev` (og andre non-main branches), `Linspo-dev` Supabase-prosjekt. Brukes lokalt (`npm run dev` → localhost:3000).
+
+Cloudflare Workers Builds gir også preview-URL for `dev`-branchen automatisk, men den bruker fortsatt `Linspo-prod` (Workers Builds støtter ikke per-environment env-vars i nåværende UI). Preview-URL er derfor nyttig for å sjekke UI-endringer, ikke for å teste mot dev-data.
+
+**Bytte mellom dev og prod lokalt:**
+
+```bash
+# Første gang: ta backup av .env.local som peker til prod
+cp .env.local .env.local.prod
+
+# Når du skal jobbe mot Linspo-dev:
+# - Lim inn Linspo-dev sin URL + publishable + secret key i .env.local
+git checkout dev
+npm run dev                            # localhost:3000 mot Linspo-dev
+npx tsx scripts/run-cron.ts            # seed Linspo-dev med artikler
+
+# Tilbake til prod-tilkobling (sjeldent — typisk hvis du må kjøre noe manuelt mot prod):
+cp .env.local.prod .env.local
+```
+
+Når dev-endringer er klare: merge `dev` → `main`. Cloudflare deployer prod automatisk.
 
 ## Kodestruktur
 
