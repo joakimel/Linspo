@@ -1,7 +1,7 @@
 # ADR-006: Ekstern cron-trigger for pålitelig daglig innhentning
 
 **Dato:** 2026-05-18
-**Status:** Godkjent
+**Status:** Godkjent — oppsett bekreftet 2026-05-18 (test run: 204 No Content, workflow trigget og fullført)
 
 ## Kontekst
 

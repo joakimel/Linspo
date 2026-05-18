@@ -11,6 +11,10 @@ Produktdefinisjon, krav og beslutningsdokumenter.
   - `ADR-003-kilde-oppdagelse-og-brukerkontroll.md` — Generelt discovery-system, fjernet dødvekt-strategier, bruker-godkjenning, manuell kildelegging, paywall-deteksjon
   - `ADR-004-solo-mvp-deploy.md` — OpenNext + Cloudflare Worker, GitHub Actions Node 22 cron, force-dynamic-render
   - `ADR-005-lest-status-og-feedback.md` — read_at-felt, article_feedback-tabell, 3-veis reaksjoner, arkiv-side, ingen AI-tilpasning ennå
+  - `ADR-006-ekstern-cron-trigger.md` — cron-job.org som primær trigger for daglig fetch, GitHub-schedule som backup
+  - `ADR-007-innholds-pipeline-arkitektur-multi-bruker.md` — Emne-drevet fetch for Fase 2+ (union av brukeres interesser, discovery for nisjer)
+- `plans/` — Planlagte endringer som ennå ikke er implementert:
+  - `dev-miljo-oppsett.md` — Cloudflare Workers Builds preview-deploys per branch + egen Supabase-instans for dev
 
 ## ADR-format
 
