@@ -2,8 +2,10 @@ name: Daily content fetch
 
 on:
   schedule:
-    # 05:00 UTC = 07:00 norsk tid (sommertid 06:00 UTC = 07:00 — godt nok)
-    - cron: "0 5 * * *"
+    # Backup-trigger: 04:00 UTC = 06:00 CEST / 05:00 CET.
+    # Primær trigger er cron-job.org som kaller workflow_dispatch kl. 07:00 Europe/Oslo.
+    # GitHub-schedule er kun fallback ved feil i cron-job.org.
+    - cron: "0 4 * * *"
   workflow_dispatch: # Manuell trigger fra Actions-UI
 
 concurrency:
